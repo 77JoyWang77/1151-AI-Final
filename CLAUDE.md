@@ -79,4 +79,6 @@ GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 
 
 下一步：方案 A 已以 gouache 重跑（人類角色的臉跨格差異很大，同一故事內畫風也會漂移）。因此提前做方案 B：在 Colab 執行 `02_ip_adapter.ipynb`，挑參考圖、掃描 scale、跑 30 格；看結果後再決定是否加「畫風一致性」指標（B 的參考圖也會統一畫風，是混淆變因）與 InstantStyle。之後做 reflection loop。
 
+方案 B 首輪掃描（故事 1、3，參考圖皆用候選 #1）：IP-Adapter 讓臉、服裝、畫風跨格一致，但 scale ≥ 0.5 每格都照抄參考圖的站姿與背景，0.7 六格近乎同一張（印證 H4）；參考圖的**背景**與**顏色**也會被照抄並壓過 prompt，故參考圖須素色背景、顏色正確。已改為 `N_REF=8`、掃描 0.2–0.4。
+
 watercolor 版觀察（待 gouache 重跑後確認）：單色系動物角色光靠 prompt 就相當一致，多色外觀的人類角色有屬性綁定錯置（顏色互換）；劇情關鍵物件常漏畫；shot_type 幾乎被忽略。

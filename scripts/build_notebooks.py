@@ -392,8 +392,8 @@ md('''
 
 code(settings_code('''
 STORIES = [1, 2, 3, 4, 5]
-N_REF = 4                  # 每個主角的參考圖候選數
-SCALES = [0.3, 0.5, 0.7]   # IP-Adapter scale 掃描
+N_REF = 8                  # 每個主角的參考圖候選數（多色外觀的人類常需要較多候選才有顏色正確的）
+SCALES = [0.2, 0.3, 0.4]   # IP-Adapter scale 掃描（首輪 0.5 以上已明顯照抄參考圖）
 SCAN_STORIES = [1, 3]      # 掃描用：方案 A 一致性最差的兩篇（多色外觀的人類）
 '''))
 md(CLONE_MD)
@@ -411,7 +411,7 @@ code(GENERATE_CODE)
 md('''
 ### 1. 生成主角參考圖候選
 
-每篇 `N_REF` 張，約 25 秒一張（5 篇 × 4 張 ≈ 8 分鐘）。**必須在載入 IP-Adapter 之前執行**：載入後每次生圖都需要參考圖。若之後要補生參考圖，請重啟執行階段再從頭跑（已生成的會略過）。
+每篇 `N_REF` 張，約 25 秒一張（5 篇 × 8 張 ≈ 17 分鐘；已生成的會略過）。**必須在載入 IP-Adapter 之前執行**：載入後每次生圖都需要參考圖。若之後要補生參考圖，請重啟執行階段再從頭跑（已生成的會略過）。
 ''')
 
 code('''
@@ -433,11 +433,15 @@ md('''
 - 外觀符合描述（髮型、服裝、配色都對）
 - 正面、全身、背景乾淨、只有一個角色
 - 姿勢中性（越特殊的姿勢越容易被照抄到每一格）
+- **背景素色**：參考圖的背景也會被照抄，有場景的參考圖會讓每一格都變成同一個場景
+- 顏色要對：參考圖的顏色會壓過 prompt，顏色錯的參考圖會讓每一格「一致地錯」
 ''')
 
 code('''
-REF_CHOICE = {1: 1, 2: 1, 3: 1, 4: 1, 5: 1}  # 故事編號 → 候選編號
+REF_CHOICE = {1: None, 2: 1, 3: None, 4: 4, 5: 2}  # 故事編號 → 候選編號；None = 尚未選定
 
+missing = [s for s in STORIES if REF_CHOICE.get(s) is None]
+assert not missing, f"請先看上面的候選圖，為故事 {missing} 填入 REF_CHOICE"
 ref_paths = {}
 for story_no in STORIES:
     job = next(j for j in ref_jobs if j["story_no"] == story_no and j["panel_index"] == REF_CHOICE[story_no])
@@ -494,7 +498,7 @@ def compare(story_no, schemes):
 md('''
 ### 4. scale 掃描
 
-scale 越高越像參考圖，但越容易壓過 prompt（動作、場景不符）或照抄參考圖姿勢。2 篇 × 6 格 × 3 個 scale ≈ 16 分鐘。看並排圖時注意：
+scale 越高越像參考圖，但越容易壓過 prompt（動作、場景不符）或照抄參考圖姿勢。首輪試跑 0.3／0.5／0.7：0.5 起每格幾乎都是參考圖的站姿與背景，0.7 六格近乎同一張圖，因此改在 0.2–0.4 間找平衡點。2 篇 × 6 格 × 3 個 scale ≈ 16 分鐘。看並排圖時注意：
 - 臉、髮型、服裝是否跨格一致（一致性）
 - 每格的動作與場景是否還符合分鏡（圖文對齊）
 - 是否每格都是參考圖的站姿（copy-paste）
@@ -514,7 +518,7 @@ md('''
 ''')
 
 code('''
-BEST_SCALE = 0.5  # 依掃描結果修改
+BEST_SCALE = 0.3  # 依掃描結果修改
 scheme = run_scheme_b(BEST_SCALE, STORIES)
 
 for story_no in STORIES:
