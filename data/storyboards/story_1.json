@@ -1,7 +1,7 @@
 {
   "title": "小女孩第一次去海邊",
   "logline": "小女孩第一次去海邊，發現了許多新奇和歡樂。",
-  "art_style": "children's picture book, warm watercolor",
+  "art_style": "children's picture book, gouache illustration, flat bold colors",
   "characters": [
     {
       "id": "lily",
@@ -103,12 +103,12 @@
     }
   ],
   "sd_prompts": [
-    "children's picture book, warm watercolor, wide shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily standing on sandy beach, looking at wide sea, morning light, gentle waves",
-    "children's picture book, warm watercolor, close up shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily touching sea water with hands, curious expression, small waves touching feet",
-    "children's picture book, warm watercolor, medium shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily and her hands building sandcastle, happy smile, bright sunlight",
-    "children's picture book, warm watercolor, close up shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily pointing at a small crab on sand, surprised and excited face",
-    "children's picture book, warm watercolor, wide shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily sitting on sand, watching sunset, warm orange glow, peaceful mood",
-    "children's picture book, warm watercolor, medium shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily holding mom's hand, walking away from beach, soft evening light, smiling face"
+    "children's picture book, gouache illustration, flat bold colors, wide shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily standing on sandy beach, looking at wide sea, morning light, gentle waves",
+    "children's picture book, gouache illustration, flat bold colors, close up shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily touching sea water with hands, curious expression, small waves touching feet",
+    "children's picture book, gouache illustration, flat bold colors, medium shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily and her hands building sandcastle, happy smile, bright sunlight",
+    "children's picture book, gouache illustration, flat bold colors, close up shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily pointing at a small crab on sand, surprised and excited face",
+    "children's picture book, gouache illustration, flat bold colors, wide shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily sitting on sand, watching sunset, warm orange glow, peaceful mood",
+    "children's picture book, gouache illustration, flat bold colors, medium shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily holding mom's hand, walking away from beach, soft evening light, smiling face"
   ],
   "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
 }

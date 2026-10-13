@@ -1,7 +1,7 @@
 {
   "title": "小狐狸第一次自己做生日蛋糕",
   "logline": "小狐狸自己做蛋糕，學會努力並期待生日驚喜。",
-  "art_style": "warm watercolor children's picture book",
+  "art_style": "children's picture book, gouache illustration, flat bold colors",
   "characters": [
     {
       "id": "fox",
@@ -103,12 +103,12 @@
     }
   ],
   "sd_prompts": [
-    "warm watercolor children's picture book, wide shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox standing in cozy kitchen, looking excited, holding mixing bowl and spoon, warm sunlight through window",
-    "warm watercolor children's picture book, medium shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox mixing ingredients in bowl, some flour spilled on table, focused expression",
-    "warm watercolor children's picture book, close up shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox pouring batter into cake mold, happy smile, kitchen background with utensils",
-    "warm watercolor children's picture book, medium shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox holding golden baked cake, proud expression, oven door open showing warmth",
-    "warm watercolor children's picture book, close up shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox decorating cake with strawberries and cream, concentrated face, colorful kitchen",
-    "warm watercolor children's picture book, wide shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox happily hugging birthday cake, warm light, cozy kitchen, feeling proud and joyful"
+    "children's picture book, gouache illustration, flat bold colors, wide shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox standing in cozy kitchen, looking excited, holding mixing bowl and spoon, warm sunlight through window",
+    "children's picture book, gouache illustration, flat bold colors, medium shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox mixing ingredients in bowl, some flour spilled on table, focused expression",
+    "children's picture book, gouache illustration, flat bold colors, close up shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox pouring batter into cake mold, happy smile, kitchen background with utensils",
+    "children's picture book, gouache illustration, flat bold colors, medium shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox holding golden baked cake, proud expression, oven door open showing warmth",
+    "children's picture book, gouache illustration, flat bold colors, close up shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox decorating cake with strawberries and cream, concentrated face, colorful kitchen",
+    "children's picture book, gouache illustration, flat bold colors, wide shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox happily hugging birthday cake, warm light, cozy kitchen, feeling proud and joyful"
   ],
   "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
 }

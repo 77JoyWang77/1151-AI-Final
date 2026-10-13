@@ -1,7 +1,7 @@
 {
   "title": "女孩和月亮的夜晚對話",
   "logline": "一個女孩在夜晚和月亮溫柔對話，感受星空的神奇和寧靜。",
-  "art_style": "children's picture book, warm watercolor",
+  "art_style": "children's picture book, gouache illustration, flat bold colors",
   "characters": [
     {
       "id": "girl",
@@ -103,12 +103,12 @@
     }
   ],
   "sd_prompts": [
-    "children's picture book, warm watercolor, wide shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl standing by window looking up, night sky visible outside, warm indoor light",
-    "children's picture book, warm watercolor, medium shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl speaking softly to bright full moon outside window, gentle expression",
-    "children's picture book, warm watercolor, close up shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl's hand reaching out to soft glowing moonlight on windowsill",
-    "children's picture book, warm watercolor, medium shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl smiling joyfully, looking up to moon with warm feelings",
-    "children's picture book, warm watercolor, wide shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl sitting happily under moonlight inside cozy room, peaceful atmosphere",
-    "children's picture book, warm watercolor, close up shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl lying peacefully in bed, eyes closed, moon visible through window"
+    "children's picture book, gouache illustration, flat bold colors, wide shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl standing by window looking up, night sky visible outside, warm indoor light",
+    "children's picture book, gouache illustration, flat bold colors, medium shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl speaking softly to bright full moon outside window, gentle expression",
+    "children's picture book, gouache illustration, flat bold colors, close up shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl's hand reaching out to soft glowing moonlight on windowsill",
+    "children's picture book, gouache illustration, flat bold colors, medium shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl smiling joyfully, looking up to moon with warm feelings",
+    "children's picture book, gouache illustration, flat bold colors, wide shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl sitting happily under moonlight inside cozy room, peaceful atmosphere",
+    "children's picture book, gouache illustration, flat bold colors, close up shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl lying peacefully in bed, eyes closed, moon visible through window"
   ],
   "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
 }

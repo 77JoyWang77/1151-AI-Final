@@ -36,6 +36,7 @@ scripts/
   run_storyboard.py   CLI：產生分鏡並存 outputs/storyboard.json
   test_offline.py     不呼叫 API 的測試
   build_notebooks.py  產生 notebooks/*.ipynb 的唯一來源（含語法檢查）；改 notebook 請改這裡再重跑
+  set_art_style.py    統一替換凍結分鏡的 art_style 並重建 sd_prompts（不呼叫 LLM）
 runs/                 Colab「儲存至 GitHub」存回的已執行 notebook（含輸出，供檢視結果）
 docs/proposal.md      企畫書（主版本，線上版已停止更新）
 docs/research_notes.md  相關研究調查、採用／不採用理由、待確認清單
@@ -63,7 +64,7 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 | 階段 | 狀態 |
 |---|---|
 | 1. 分鏡 Agent | **完成**：5 個實驗主題皆產出合法分鏡並凍結於 `data/storyboards/`。驗證涵蓋格數、未定義角色、每格最多 2 角色、SD prompt 粗估 ≤ 75 tokens；不合格自動重試一次、只快取合格結果 |
-| 2. Colab 跑通 SDXL 逐格生圖 | notebook `01_sdxl_baseline.ipynb` 已寫好（語法檢查通過），**尚未在 Colab 實際執行** |
+| 2. Colab 跑通 SDXL 逐格生圖 | 流程已在 Colab 跑通（watercolor 版 30 格：同 seed 像素差 0、每格 25 秒、實際 tokens 最長 61、實際/粗估 1.09 → `MAX_CLIP_TOKENS=68`）。畫風比較後改用 gouache，**方案 A 需以新畫風重跑** |
 | 3. IP-Adapter、LoRA | 未開始（課程 W12，11/24 後） |
 | 4. Reflection loop | 未開始 |
 | 5. 排版、Gradio、一致性實驗 | 未開始 |
@@ -75,4 +76,6 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 - 配角（如故事 1 的媽媽）LLM 不一定定義成角色，程式無法從中文劇情偵測；主實驗只量測主角一致性。
 GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 `git clone` 取得程式與 `data/storyboards/`。
 
-下一步：notebook 已推上 GitHub，在 Colab 執行 `01_sdxl_baseline.ipynb`（建議先 `STORIES = [1]` 試跑）；確認 tokenizer 實測長度、同 seed 可重現性、每格耗時，以及方案 A 的 30 張圖（里程碑 10/28–11/16）。
+下一步：在 Colab 以 gouache 重跑方案 A 的 30 格（prompt 改變的格會自動重生），檢視一致性與圖文對齊；再把「外觀顏色屬性數量 vs 一致性」觀察寫入企畫書，接著做 reflection loop（里程碑 10/28–11/16）。
+
+watercolor 版觀察（待 gouache 重跑後確認）：單色系動物角色光靠 prompt 就相當一致，多色外觀的人類角色有屬性綁定錯置（顏色互換）；劇情關鍵物件常漏畫；shot_type 幾乎被忽略。

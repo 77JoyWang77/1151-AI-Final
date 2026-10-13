@@ -5,6 +5,7 @@
 - 凍結日期：2026-10-13
 - 產生方式：`scripts/run_storyboard.py "<主題>" --panels 6`，模型 `gpt-4.1-mini`，其餘參數用預設值（3–6 歲兒童、溫暖的水彩繪本風）
 - 每個檔案除了 `Storyboard` 欄位，還附有 `sd_prompts`（`build_sd_prompt()` 組合結果）與 `negative_prompt`
+- 畫風：5 份統一為 `children's picture book, gouache illustration, flat bold colors`（2026-10-13 由畫風比較選定，以 `scripts/set_art_style.py` 寫入；原本是 LLM 各自寫的 warm watercolor）。只改 `art_style` 與 `sd_prompts`，劇情與角色不變
 
 | 檔案 | 主題 | 角色 |
 | --- | --- | --- |

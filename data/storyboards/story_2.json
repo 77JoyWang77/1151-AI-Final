@@ -1,7 +1,7 @@
 {
   "title": "小熊找回遺失的帽子",
   "logline": "小熊遺失帽子，透過尋找學會耐心與友誼。",
-  "art_style": "warm watercolor children's picture book",
+  "art_style": "children's picture book, gouache illustration, flat bold colors",
   "characters": [
     {
       "id": "bear",
@@ -111,12 +111,12 @@
     }
   ],
   "sd_prompts": [
-    "warm watercolor children's picture book, medium shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear looking worried, searching ground, empty park, morning light",
-    "warm watercolor children's picture book, close up shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear talking to small butterfly, colorful flowers, gentle sunlight",
-    "warm watercolor children's picture book, over the shoulder shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear looking toward river, butterfly nearby, green grass, soft light",
-    "warm watercolor children's picture book, medium shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear talking to frog near river, calm water, dappled sunlight",
-    "warm watercolor children's picture book, close up shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear reaching for hat on tree branch, forest background, warm light",
-    "warm watercolor children's picture book, wide shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear wearing hat, smiling, forest path, golden afternoon light"
+    "children's picture book, gouache illustration, flat bold colors, medium shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear looking worried, searching ground, empty park, morning light",
+    "children's picture book, gouache illustration, flat bold colors, close up shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear talking to small butterfly, colorful flowers, gentle sunlight",
+    "children's picture book, gouache illustration, flat bold colors, over the shoulder shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear looking toward river, butterfly nearby, green grass, soft light",
+    "children's picture book, gouache illustration, flat bold colors, medium shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear talking to frog near river, calm water, dappled sunlight",
+    "children's picture book, gouache illustration, flat bold colors, close up shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear reaching for hat on tree branch, forest background, warm light",
+    "children's picture book, gouache illustration, flat bold colors, wide shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear wearing hat, smiling, forest path, golden afternoon light"
   ],
   "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
 }

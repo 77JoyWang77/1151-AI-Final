@@ -34,7 +34,7 @@ md('''
 - 生圖參數固定在 `comic_agent.render.GenConfig`（SDXL base 1.0、fp16、DPM++ 2M Karras、30 步、CFG 6.5、1024×1024）
 - seed = 故事編號 × 100 + 格數，四種方案共用
 - 每張圖旁邊存一份 `.json`，記錄 prompt、seed、參數、耗時、git commit
-- 結果存到 Google Drive，**斷線後重跑會略過已完成的格**
+- 結果存到 Google Drive，**斷線後重跑會略過已完成的格**；若 prompt 改變（例如換畫風），該格會重新生成並覆蓋
 ''')
 
 code('''
@@ -172,10 +172,14 @@ from PIL import Image
 
 
 def generate(job, out_root=OUT_ROOT, skip_existing=True):
-    """生成一格並存圖與紀錄；已存在就略過（斷線續跑）。"""
+    """生成一格並存圖與紀錄；已存在且 prompt 相同就略過（斷線續跑）。
+
+    prompt 不同（例如換了畫風）會重新生成並覆蓋，避免沿用舊圖。
+    """
     png, js = render.panel_paths(out_root, job)
     if skip_existing and png.exists() and js.exists():
-        return png, False
+        if json.loads(js.read_text(encoding="utf-8"))["prompt"] == job["prompt"]:
+            return png, False
     generator = torch.Generator("cpu").manual_seed(job["seed"])  # CPU generator：跨機器較可重現
     t0 = time.time()
     image = pipe(

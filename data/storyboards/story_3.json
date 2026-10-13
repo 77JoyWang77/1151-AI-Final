@@ -1,7 +1,7 @@
 {
   "title": "雨天裡的溫暖小幫手",
   "logline": "男孩在雨天幫助迷路的小貓找到回家的路。",
-  "art_style": "warm watercolor children's picture book",
+  "art_style": "children's picture book, gouache illustration, flat bold colors",
   "characters": [
     {
       "id": "boy",
@@ -118,12 +118,12 @@
     }
   ],
   "sd_prompts": [
-    "warm watercolor children's picture book, wide shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, boy holding blue umbrella walking on wet street with raindrops, gentle expression, cloudy light",
-    "warm watercolor children's picture book, medium shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy spotting frightened kitten hiding in wet street corner, concerned look",
-    "warm watercolor children's picture book, close up shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy crouching shielding kitten with umbrella, kitten looking relieved, soft warm light",
-    "warm watercolor children's picture book, wide shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy carrying kitten walking carefully on rainy street, looking around for clues",
-    "warm watercolor children's picture book, medium shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy standing by house door, kitten excitedly meowing, soft evening light",
-    "warm watercolor children's picture book, over the shoulder shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy waving goodbye to kitten at doorstep, kitten looking happy inside, warm light"
+    "children's picture book, gouache illustration, flat bold colors, wide shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, boy holding blue umbrella walking on wet street with raindrops, gentle expression, cloudy light",
+    "children's picture book, gouache illustration, flat bold colors, medium shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy spotting frightened kitten hiding in wet street corner, concerned look",
+    "children's picture book, gouache illustration, flat bold colors, close up shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy crouching shielding kitten with umbrella, kitten looking relieved, soft warm light",
+    "children's picture book, gouache illustration, flat bold colors, wide shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy carrying kitten walking carefully on rainy street, looking around for clues",
+    "children's picture book, gouache illustration, flat bold colors, medium shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy standing by house door, kitten excitedly meowing, soft evening light",
+    "children's picture book, gouache illustration, flat bold colors, over the shoulder shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy waving goodbye to kitten at doorstep, kitten looking happy inside, warm light"
   ],
   "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
 }
