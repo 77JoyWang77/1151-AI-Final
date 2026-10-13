@@ -35,6 +35,8 @@ notebooks/
 scripts/
   run_storyboard.py   CLI：產生分鏡並存 outputs/storyboard.json
   test_offline.py     不呼叫 API 的測試
+  build_notebooks.py  產生 notebooks/*.ipynb 的唯一來源（含語法檢查）；改 notebook 請改這裡再重跑
+runs/                 Colab「儲存至 GitHub」存回的已執行 notebook（含輸出，供檢視結果）
 docs/proposal.md      企畫書（主版本，線上版已停止更新）
 docs/research_notes.md  相關研究調查、採用／不採用理由、待確認清單
 data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Colab 讀取；不要修改或重生）
@@ -54,6 +56,7 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 - 改完執行 `python scripts/test_offline.py` 確認沒壞。
 - 程式自己印的訊息不要用 `✓` 等 cp950 編不出的符號（Windows 終端機會報 `UnicodeEncodeError`）；scripts 開頭保留 `sys.stdout.reconfigure(encoding="utf-8")` 處理 LLM 輸出。
 - 不要提交 `.env`、`.cache/`、`outputs/`、`*.safetensors`。
+- Colab 存回 GitHub 時，路徑開頭不能有空格（OneDrive 無法同步，需用 `git mv` 修正）；Colab Secrets 的 `GH_TOKEN` 只能放 GitHub token（repo 是 public，通常不需要）。
 
 ## 目前進度（2026-10-13）
 
