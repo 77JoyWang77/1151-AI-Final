@@ -50,6 +50,37 @@ def iter_jobs(boards: dict[int, dict], scheme: str):
             }
 
 
+REFERENCE_VIEW = "full body, front view, standing, neutral pose, plain white background"
+REFERENCE_NEGATIVE = "multiple characters, busy background, cropped"
+
+
+def protagonist(board: dict) -> dict:
+    """主角 = characters 的第一個（分鏡 Agent 依重要性排序；5 份凍結分鏡皆成立）。"""
+    return board["characters"][0]
+
+
+def reference_jobs(boards: dict[int, dict], n_candidates: int):
+    """方案 B 的角色參考圖候選：每篇主角生成 n 張正面全身立繪，供人工挑選。
+
+    沿用 iter_jobs 的欄位格式（scheme="refs"、panel_index=候選編號），
+    可直接交給 notebook 的 generate() 與 panel_paths()。
+    中性站姿與白背景：降低 IP-Adapter 照抄參考圖姿勢與構圖的傾向。
+    """
+    for story_no, sb in sorted(boards.items()):
+        hero = protagonist(sb)
+        prompt = ", ".join([sb["art_style"], REFERENCE_VIEW, f"{hero['id']}: {hero['appearance']}"])
+        for k in range(1, n_candidates + 1):
+            yield {
+                "scheme": "refs",
+                "story_no": story_no,
+                "panel_index": k,
+                "characters": [hero["id"]],
+                "prompt": prompt,
+                "negative_prompt": f"{sb['negative_prompt']}, {REFERENCE_NEGATIVE}",
+                "seed": 9000 + panel_seed(story_no, k),
+            }
+
+
 def panel_paths(out_root: str | Path, job: dict) -> tuple[Path, Path]:
     """輸出路徑：<out_root>/<scheme>/story_N/panel_XX.png 與同名 .json。"""
     base = Path(out_root) / job["scheme"] / f"story_{job['story_no']}" / f"panel_{job['panel_index']:02d}"

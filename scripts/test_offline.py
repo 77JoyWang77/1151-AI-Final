@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from comic_agent import Storyboard, build_sd_prompt, llm, render, validate_storyboard  # noqa: E402
+from comic_agent.storyboard import MAX_CLIP_TOKENS, estimate_clip_tokens  # noqa: E402
 
 SAMPLE = {
     "title": "雨天的小貓",
@@ -86,6 +87,13 @@ def test_render_jobs():
     png, js = render.panel_paths("/out", jobs[7])
     assert png.as_posix().endswith("A/story_2/panel_02.png") and js.suffix == ".json"
     print(f"[OK] 凍結分鏡 → {len(jobs)} 個生圖工作，seed 不重複")
+
+    refs = list(render.reference_jobs(boards, n_candidates=4))
+    assert len(refs) == 20 and len({r["seed"] for r in refs} | {j["seed"] for j in jobs}) == 50
+    assert [render.protagonist(boards[n])["id"] for n in range(1, 6)] == ["lily", "bear", "boy", "fox", "girl"]
+    assert all(r["prompt"].startswith(boards[r["story_no"]]["art_style"]) for r in refs)
+    assert max(estimate_clip_tokens(r["prompt"]) for r in refs) <= MAX_CLIP_TOKENS
+    print(f"[OK] 參考圖候選 {len(refs)} 張，主角正確，seed 與分鏡不重疊，prompt 長度在上限內")
 
 
 class _FakeClient:
