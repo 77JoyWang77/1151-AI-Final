@@ -57,7 +57,9 @@ def generate_storyboard(
     return sb
 
 
-MAX_CLIP_TOKENS = 75  # CLIP 上限 77，扣掉 BOS / EOS
+# 粗估值上限。CLIP 上限 77（含 BOS / EOS，可用 75）；Colab 實測 30 格，
+# 實際 tokens ÷ 粗估平均 1.09，故 75 / 1.09 ≈ 68。
+MAX_CLIP_TOKENS = 68
 MAX_CHARS_PER_PANEL = 2  # 範圍以單一主角為底線，多角色同框是彈性目標
 
 

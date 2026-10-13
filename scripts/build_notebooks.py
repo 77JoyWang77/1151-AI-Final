@@ -251,6 +251,71 @@ secs = [json.loads(p.read_text(encoding="utf-8"))["seconds"]
 print(f"已完成 {len(secs)} 格，平均每格 {sum(secs) / len(secs):.1f} 秒")
 ''')
 
+md('''
+### （選用）畫風比較
+
+同一格分鏡、同一個 seed，只替換 `art_style`，比較不同畫風。角色外觀與場景完全不變，`current` 那一列應與方案 A 的圖相同。
+
+- 測試 2 格：故事 1 第 3 格（多色外觀的人類）、故事 2 第 1 格（單色系動物）
+- 結果存到 `outputs/style_compare/`，重跑會略過已生成的圖
+- 可自行增刪 `STYLES`；不要放在世畫家或工作室名稱（企畫書倫理原則）
+- 選定後，畫風會統一寫回 5 份凍結分鏡並重跑方案 A
+''')
+
+code('''
+from PIL import ImageDraw
+
+from comic_agent import Storyboard, build_sd_prompt
+
+STYLES = {  # key 用英文，當作檔名與圖上標籤
+    "current": None,  # None = 用凍結分鏡原本的 prompt（各篇 art_style 字序略有不同）
+    "watercolor_cool": "children's picture book, soft watercolor, muted pastel colors, light airy palette",
+    "colored_pencil": "children's picture book, colored pencil illustration, soft textures",
+    "gouache": "children's picture book, gouache illustration, flat bold colors",
+    "flat_vector": "children's picture book, flat vector illustration, clean shapes, minimal shading",
+    "crayon": "children's picture book, crayon drawing, textured paper, playful",
+    "digital_paint": "children's picture book, digital painting, soft lighting, storybook illustration",
+}
+TEST_PANELS = [(1, 3), (2, 1)]  # (故事編號, 格數)
+STYLE_DIR = Path(DRIVE_ROOT) / "outputs" / "style_compare"
+
+
+def style_job(story_no, panel_index, style):
+    board = boards[story_no]
+    if style is None:
+        prompt = board["sd_prompts"][panel_index - 1]
+    else:
+        sb = Storyboard.model_validate(board).model_copy(update={"art_style": style})
+        prompt = build_sd_prompt(sb, sb.panels[panel_index - 1])
+    return {"prompt": prompt, "negative_prompt": board["negative_prompt"],
+            "seed": render.panel_seed(story_no, panel_index)}
+
+
+THUMB = 384
+grid = Image.new("RGB", (THUMB * len(TEST_PANELS), (THUMB + 28) * len(STYLES)), "white")
+draw = ImageDraw.Draw(grid)
+for row, (key, style) in enumerate(STYLES.items()):
+    for col, (story_no, panel_index) in enumerate(TEST_PANELS):
+        png = STYLE_DIR / f"{key}_s{story_no}p{panel_index}.png"
+        if not png.exists():
+            job = style_job(story_no, panel_index, style)
+            image = pipe(
+                prompt=job["prompt"], negative_prompt=job["negative_prompt"],
+                num_inference_steps=CONFIG.steps, guidance_scale=CONFIG.cfg,
+                width=CONFIG.width, height=CONFIG.height,
+                generator=torch.Generator("cpu").manual_seed(job["seed"]),
+            ).images[0]
+            png.parent.mkdir(parents=True, exist_ok=True)
+            image.save(png)
+        y = row * (THUMB + 28)
+        grid.paste(Image.open(png).resize((THUMB, THUMB)), (col * THUMB, y + 28))
+    draw.text((6, y + 6), key, fill="black")
+    print(f"{key}: {style or '（各篇凍結分鏡原本的 art_style）'}")
+
+grid.save(STYLE_DIR / "style_compare.png")
+display(grid)
+''')
+
 nb = {
     "nbformat": 4,
     "nbformat_minor": 0,
