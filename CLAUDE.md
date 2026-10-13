@@ -72,4 +72,4 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 - 配角（如故事 1 的媽媽）LLM 不一定定義成角色，程式無法從中文劇情偵測；主實驗只量測主角一致性。
 GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 `git clone` 取得程式與 `data/storyboards/`。
 
-下一步：commit 並 push 後，在 Colab 執行 `01_sdxl_baseline.ipynb`；確認 tokenizer 實測長度、同 seed 可重現性、每格耗時，以及方案 A 的 30 張圖（里程碑 10/28–11/16）。
+下一步：notebook 已推上 GitHub，在 Colab 執行 `01_sdxl_baseline.ipynb`（建議先 `STORIES = [1]` 試跑）；確認 tokenizer 實測長度、同 seed 可重現性、每格耗時，以及方案 A 的 30 張圖（里程碑 10/28–11/16）。
