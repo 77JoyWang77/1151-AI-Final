@@ -1,0 +1,122 @@
+{
+  "title": "小熊找回遺失的帽子",
+  "logline": "小熊遺失帽子，透過尋找學會耐心與友誼。",
+  "art_style": "warm watercolor children's picture book",
+  "characters": [
+    {
+      "id": "bear",
+      "name": "小熊",
+      "appearance": "brown bear, round face, small ears, red scarf, blue overalls",
+      "personality": "好奇又有點粗心的小熊，喜歡幫助別人，也很重視朋友。"
+    }
+  ],
+  "panels": [
+    {
+      "index": 1,
+      "scene": "小熊發現自己的帽子不見了，他著急地開始找。",
+      "characters": [
+        "bear"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "bear looking worried, searching ground, empty park, morning light",
+      "dialogue": [
+        {
+          "speaker": "bear",
+          "text": "我的帽子不見了！我要找找看！"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "scene": "小熊來到花園，問花園裡的蝴蝶是否見過他的帽子。",
+      "characters": [
+        "bear"
+      ],
+      "shot_type": "close_up",
+      "image_prompt": "bear talking to small butterfly, colorful flowers, gentle sunlight",
+      "dialogue": [
+        {
+          "speaker": "bear",
+          "text": "蝴蝶，你有沒有看到我的帽子？"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "scene": "蝴蝶回答牠沒有，但建議去問正在河邊的青蛙。",
+      "characters": [
+        "bear"
+      ],
+      "shot_type": "over_the_shoulder",
+      "image_prompt": "bear looking toward river, butterfly nearby, green grass, soft light",
+      "dialogue": [
+        {
+          "speaker": "narrator",
+          "text": "蝴蝶告訴小熊，河邊的青蛙可能知道。"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "scene": "小熊到河邊詢問青蛙，青蛙搖搖頭，說他沒看到，但看到帽子飛向森林。",
+      "characters": [
+        "bear"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "bear talking to frog near river, calm water, dappled sunlight",
+      "dialogue": [
+        {
+          "speaker": "bear",
+          "text": "青蛙，你有沒有看到我的帽子？"
+        },
+        {
+          "speaker": "narrator",
+          "text": "青蛙說帽子飛向森林了。"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "scene": "小熊走進森林，發現帽子被掛在樹枝上，他快樂地伸手要拿回。",
+      "characters": [
+        "bear"
+      ],
+      "shot_type": "close_up",
+      "image_prompt": "bear reaching for hat on tree branch, forest background, warm light",
+      "dialogue": [
+        {
+          "speaker": "bear",
+          "text": "哈哈，帽子找到了！"
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "scene": "小熊戴上帽子，高興地對著森林說謝謝，準備回家。",
+      "characters": [
+        "bear"
+      ],
+      "shot_type": "wide",
+      "image_prompt": "bear wearing hat, smiling, forest path, golden afternoon light",
+      "dialogue": [
+        {
+          "speaker": "bear",
+          "text": "謝謝你們，我要回家了！"
+        },
+        {
+          "speaker": "narrator",
+          "text": "小熊學會了耐心和朋友的幫助很重要。"
+        }
+      ]
+    }
+  ],
+  "sd_prompts": [
+    "warm watercolor children's picture book, medium shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear looking worried, searching ground, empty park, morning light",
+    "warm watercolor children's picture book, close up shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear talking to small butterfly, colorful flowers, gentle sunlight",
+    "warm watercolor children's picture book, over the shoulder shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear looking toward river, butterfly nearby, green grass, soft light",
+    "warm watercolor children's picture book, medium shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear talking to frog near river, calm water, dappled sunlight",
+    "warm watercolor children's picture book, close up shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear reaching for hat on tree branch, forest background, warm light",
+    "warm watercolor children's picture book, wide shot, bear: brown bear, round face, small ears, red scarf, blue overalls, bear wearing hat, smiling, forest path, golden afternoon light"
+  ],
+  "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
+}

@@ -1,0 +1,4 @@
+openai>=1.66
+pydantic>=2.7
+python-dotenv>=1.0
+# 第二階段（Colab 生圖）再加：diffusers, transformers, accelerate, open_clip_torch

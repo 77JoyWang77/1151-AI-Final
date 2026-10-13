@@ -1,0 +1,129 @@
+{
+  "title": "雨天裡的溫暖小幫手",
+  "logline": "男孩在雨天幫助迷路的小貓找到回家的路。",
+  "art_style": "warm watercolor children's picture book",
+  "characters": [
+    {
+      "id": "boy",
+      "name": "小傑",
+      "appearance": "young boy, short brown hair, blue raincoat, yellow rain boots, small backpack",
+      "personality": "善良又勇敢，樂於幫助別人"
+    },
+    {
+      "id": "kitten",
+      "name": "小貓",
+      "appearance": "small gray kitten, big eyes, white paws",
+      "personality": "害怕又迷路，渴望找到溫暖家"
+    }
+  ],
+  "panels": [
+    {
+      "index": 1,
+      "scene": "下著細雨，小傑在街上撐著藍色雨傘走路。",
+      "characters": [
+        "boy"
+      ],
+      "shot_type": "wide",
+      "image_prompt": "boy holding blue umbrella walking on wet street with raindrops, gentle expression, cloudy light",
+      "dialogue": [
+        {
+          "speaker": "narrator",
+          "text": "小傑撐著傘走在下雨的街上。"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "scene": "小傑發現一隻淋濕又害怕的小貓躲在街角。",
+      "characters": [
+        "boy",
+        "kitten"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "boy spotting frightened kitten hiding in wet street corner, concerned look",
+      "dialogue": [
+        {
+          "speaker": "boy",
+          "text": "小貓，你怎麼一個人在這裡？"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "scene": "小傑蹲下，用雨傘遮住小貓，輕輕地摸牠。",
+      "characters": [
+        "boy",
+        "kitten"
+      ],
+      "shot_type": "close_up",
+      "image_prompt": "boy crouching shielding kitten with umbrella, kitten looking relieved, soft warm light",
+      "dialogue": [
+        {
+          "speaker": "boy",
+          "text": "別怕，我會幫助你的。"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "scene": "小傑抱著小貓，沿著街道尋找牠的家。",
+      "characters": [
+        "boy",
+        "kitten"
+      ],
+      "shot_type": "wide",
+      "image_prompt": "boy carrying kitten walking carefully on rainy street, looking around for clues",
+      "dialogue": [
+        {
+          "speaker": "narrator",
+          "text": "小傑帶著小貓一起找牠的家。"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "scene": "他們來到一戶人家門口，小貓快樂地叫著。",
+      "characters": [
+        "boy",
+        "kitten"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "boy standing by house door, kitten excitedly meowing, soft evening light",
+      "dialogue": [
+        {
+          "speaker": "kitten",
+          "text": "喵！這是我的家！"
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "scene": "小傑和小貓揮手道別，小貓安全回家了。",
+      "characters": [
+        "boy",
+        "kitten"
+      ],
+      "shot_type": "over_the_shoulder",
+      "image_prompt": "boy waving goodbye to kitten at doorstep, kitten looking happy inside, warm light",
+      "dialogue": [
+        {
+          "speaker": "boy",
+          "text": "以後小心點喔！"
+        },
+        {
+          "speaker": "narrator",
+          "text": "小傑開心地看著小貓回家了。"
+        }
+      ]
+    }
+  ],
+  "sd_prompts": [
+    "warm watercolor children's picture book, wide shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, boy holding blue umbrella walking on wet street with raindrops, gentle expression, cloudy light",
+    "warm watercolor children's picture book, medium shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy spotting frightened kitten hiding in wet street corner, concerned look",
+    "warm watercolor children's picture book, close up shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy crouching shielding kitten with umbrella, kitten looking relieved, soft warm light",
+    "warm watercolor children's picture book, wide shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy carrying kitten walking carefully on rainy street, looking around for clues",
+    "warm watercolor children's picture book, medium shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy standing by house door, kitten excitedly meowing, soft evening light",
+    "warm watercolor children's picture book, over the shoulder shot, boy: young boy, short brown hair, blue raincoat, yellow rain boots, small backpack, kitten: small gray kitten, big eyes, white paws, boy waving goodbye to kitten at doorstep, kitten looking happy inside, warm light"
+  ],
+  "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
+}

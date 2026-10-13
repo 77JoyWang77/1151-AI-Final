@@ -1,0 +1,114 @@
+{
+  "title": "小狐狸第一次自己做生日蛋糕",
+  "logline": "小狐狸自己做蛋糕，學會努力並期待生日驚喜。",
+  "art_style": "warm watercolor children's picture book",
+  "characters": [
+    {
+      "id": "fox",
+      "name": "小狐狸",
+      "appearance": "orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears",
+      "personality": "好奇、用心、勇敢的小狐狸"
+    }
+  ],
+  "panels": [
+    {
+      "index": 1,
+      "scene": "小狐狸決定自己做生日蛋糕。",
+      "characters": [
+        "fox"
+      ],
+      "shot_type": "wide",
+      "image_prompt": "fox standing in cozy kitchen, looking excited, holding mixing bowl and spoon, warm sunlight through window",
+      "dialogue": [
+        {
+          "speaker": "fox",
+          "text": "我要自己做生日蛋糕！"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "scene": "小狐狸開始準備材料，手忙腳亂但很認真。",
+      "characters": [
+        "fox"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "fox mixing ingredients in bowl, some flour spilled on table, focused expression",
+      "dialogue": [
+        {
+          "speaker": "fox",
+          "text": "先把麵粉和蛋攪拌均勻！"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "scene": "小狐狸把蛋糕糊倒進模具裡，笑得很開心。",
+      "characters": [
+        "fox"
+      ],
+      "shot_type": "close_up",
+      "image_prompt": "fox pouring batter into cake mold, happy smile, kitchen background with utensils",
+      "dialogue": [
+        {
+          "speaker": "fox",
+          "text": "倒進模具裡，蛋糕快完成了！"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "scene": "蛋糕烤好，小狐狸拿出來，蛋糕膨脹金黃香噴噴。",
+      "characters": [
+        "fox"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "fox holding golden baked cake, proud expression, oven door open showing warmth",
+      "dialogue": [
+        {
+          "speaker": "fox",
+          "text": "哇，好香啊，蛋糕烤好了！"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "scene": "小狐狸細心裝飾蛋糕，努力裝上草莓和奶油。",
+      "characters": [
+        "fox"
+      ],
+      "shot_type": "close_up",
+      "image_prompt": "fox decorating cake with strawberries and cream, concentrated face, colorful kitchen",
+      "dialogue": [
+        {
+          "speaker": "fox",
+          "text": "裝飾好漂亮，我好期待！"
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "scene": "小狐狸抱著完成的蛋糕，滿足地看著。",
+      "characters": [
+        "fox"
+      ],
+      "shot_type": "wide",
+      "image_prompt": "fox happily hugging birthday cake, warm light, cozy kitchen, feeling proud and joyful",
+      "dialogue": [
+        {
+          "speaker": "fox",
+          "text": "這是我做的第一個蛋糕，好棒！"
+        }
+      ]
+    }
+  ],
+  "sd_prompts": [
+    "warm watercolor children's picture book, wide shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox standing in cozy kitchen, looking excited, holding mixing bowl and spoon, warm sunlight through window",
+    "warm watercolor children's picture book, medium shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox mixing ingredients in bowl, some flour spilled on table, focused expression",
+    "warm watercolor children's picture book, close up shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox pouring batter into cake mold, happy smile, kitchen background with utensils",
+    "warm watercolor children's picture book, medium shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox holding golden baked cake, proud expression, oven door open showing warmth",
+    "warm watercolor children's picture book, close up shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox decorating cake with strawberries and cream, concentrated face, colorful kitchen",
+    "warm watercolor children's picture book, wide shot, fox: orange fox, white belly, big eyes, little paws, red scarf, bushy tail, small ears, fox happily hugging birthday cake, warm light, cozy kitchen, feeling proud and joyful"
+  ],
+  "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
+}

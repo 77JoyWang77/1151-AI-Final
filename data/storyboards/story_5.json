@@ -1,0 +1,114 @@
+{
+  "title": "女孩和月亮的夜晚對話",
+  "logline": "一個女孩在夜晚和月亮溫柔對話，感受星空的神奇和寧靜。",
+  "art_style": "children's picture book, warm watercolor",
+  "characters": [
+    {
+      "id": "girl",
+      "name": "女孩",
+      "appearance": "young girl, curly brown hair, pink pajamas, red slippers, small necklace",
+      "personality": "好奇、溫柔、喜愛夜空"
+    }
+  ],
+  "panels": [
+    {
+      "index": 1,
+      "scene": "夜晚，女孩站在自家窗邊凝望天空。",
+      "characters": [
+        "girl"
+      ],
+      "shot_type": "wide",
+      "image_prompt": "girl standing by window looking up, night sky visible outside, warm indoor light",
+      "dialogue": [
+        {
+          "speaker": "narrator",
+          "text": "女孩抬頭看著深藍色的夜空。"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "scene": "女孩看到明亮的月亮，開始對它說話。",
+      "characters": [
+        "girl"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "girl speaking softly to bright full moon outside window, gentle expression",
+      "dialogue": [
+        {
+          "speaker": "girl",
+          "text": "月亮，妳今晚好美！"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "scene": "月光灑進屋內，女孩伸手試圖摸摸月光。",
+      "characters": [
+        "girl"
+      ],
+      "shot_type": "close_up",
+      "image_prompt": "girl's hand reaching out to soft glowing moonlight on windowsill",
+      "dialogue": [
+        {
+          "speaker": "narrator",
+          "text": "月光溫柔地灑在女孩手上。"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "scene": "女孩和月亮像朋友般聊天，臉上帶著開心微笑。",
+      "characters": [
+        "girl"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "girl smiling joyfully, looking up to moon with warm feelings",
+      "dialogue": [
+        {
+          "speaker": "girl",
+          "text": "妳會陪我玩到天亮嗎？"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "scene": "月光照亮女孩整個房間，她感到安心與幸福。",
+      "characters": [
+        "girl"
+      ],
+      "shot_type": "wide",
+      "image_prompt": "girl sitting happily under moonlight inside cozy room, peaceful atmosphere",
+      "dialogue": [
+        {
+          "speaker": "narrator",
+          "text": "女孩感受到月亮的溫暖陪伴。"
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "scene": "女孩安心地躺回床上，望著窗外月亮入睡。",
+      "characters": [
+        "girl"
+      ],
+      "shot_type": "close_up",
+      "image_prompt": "girl lying peacefully in bed, eyes closed, moon visible through window",
+      "dialogue": [
+        {
+          "speaker": "narrator",
+          "text": "女孩帶著微笑進入夢鄉。"
+        }
+      ]
+    }
+  ],
+  "sd_prompts": [
+    "children's picture book, warm watercolor, wide shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl standing by window looking up, night sky visible outside, warm indoor light",
+    "children's picture book, warm watercolor, medium shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl speaking softly to bright full moon outside window, gentle expression",
+    "children's picture book, warm watercolor, close up shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl's hand reaching out to soft glowing moonlight on windowsill",
+    "children's picture book, warm watercolor, medium shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl smiling joyfully, looking up to moon with warm feelings",
+    "children's picture book, warm watercolor, wide shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl sitting happily under moonlight inside cozy room, peaceful atmosphere",
+    "children's picture book, warm watercolor, close up shot, girl: young girl, curly brown hair, pink pajamas, red slippers, small necklace, girl lying peacefully in bed, eyes closed, moon visible through window"
+  ],
+  "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
+}

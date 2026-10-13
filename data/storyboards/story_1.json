@@ -1,0 +1,114 @@
+{
+  "title": "小女孩第一次去海邊",
+  "logline": "小女孩第一次去海邊，發現了許多新奇和歡樂。",
+  "art_style": "children's picture book, warm watercolor",
+  "characters": [
+    {
+      "id": "lily",
+      "name": "莉莉",
+      "appearance": "young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals",
+      "personality": "curious, shy but brave"
+    }
+  ],
+  "panels": [
+    {
+      "index": 1,
+      "scene": "莉莉帶著媽媽第一次來到海邊，驚奇地看著遼闊的海洋。",
+      "characters": [
+        "lily"
+      ],
+      "shot_type": "wide",
+      "image_prompt": "lily standing on sandy beach, looking at wide sea, morning light, gentle waves",
+      "dialogue": [
+        {
+          "speaker": "narrator",
+          "text": "莉莉第一次看到這麼大的海洋。"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "scene": "莉莉彎腰用手摸海水，感覺冰涼又不一樣。",
+      "characters": [
+        "lily"
+      ],
+      "shot_type": "close_up",
+      "image_prompt": "lily touching sea water with hands, curious expression, small waves touching feet",
+      "dialogue": [
+        {
+          "speaker": "lily",
+          "text": "媽媽，海水好涼喔！"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "scene": "莉莉與媽媽一起堆沙堡，開心地笑著。",
+      "characters": [
+        "lily"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "lily and her hands building sandcastle, happy smile, bright sunlight",
+      "dialogue": [
+        {
+          "speaker": "lily",
+          "text": "媽媽，我們一起蓋城堡吧！"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "scene": "莉莉看到一隻小蟹子，輕輕地用手指指著牠。",
+      "characters": [
+        "lily"
+      ],
+      "shot_type": "close_up",
+      "image_prompt": "lily pointing at a small crab on sand, surprised and excited face",
+      "dialogue": [
+        {
+          "speaker": "lily",
+          "text": "哇，有小蟹子呢！"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "scene": "太陽漸漸西下，莉莉坐在沙灘上看著美麗的夕陽。",
+      "characters": [
+        "lily"
+      ],
+      "shot_type": "wide",
+      "image_prompt": "lily sitting on sand, watching sunset, warm orange glow, peaceful mood",
+      "dialogue": [
+        {
+          "speaker": "narrator",
+          "text": "一天的海邊時光讓莉莉好滿足。"
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "scene": "莉莉和媽媽手牽手離開海邊，莉莉露出幸福微笑。",
+      "characters": [
+        "lily"
+      ],
+      "shot_type": "medium",
+      "image_prompt": "lily holding mom's hand, walking away from beach, soft evening light, smiling face",
+      "dialogue": [
+        {
+          "speaker": "lily",
+          "text": "我還想再來海邊！"
+        }
+      ]
+    }
+  ],
+  "sd_prompts": [
+    "children's picture book, warm watercolor, wide shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily standing on sandy beach, looking at wide sea, morning light, gentle waves",
+    "children's picture book, warm watercolor, close up shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily touching sea water with hands, curious expression, small waves touching feet",
+    "children's picture book, warm watercolor, medium shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily and her hands building sandcastle, happy smile, bright sunlight",
+    "children's picture book, warm watercolor, close up shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily pointing at a small crab on sand, surprised and excited face",
+    "children's picture book, warm watercolor, wide shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily sitting on sand, watching sunset, warm orange glow, peaceful mood",
+    "children's picture book, warm watercolor, medium shot, lily: young girl, curly brown hair, pink sun hat, blue swimsuit, yellow sandals, lily holding mom's hand, walking away from beach, soft evening light, smiling face"
+  ],
+  "negative_prompt": "text, watermark, signature, speech bubble, extra fingers, deformed hands, blurry, low quality, multiple views"
+}
