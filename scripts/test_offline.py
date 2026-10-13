@@ -8,9 +8,10 @@ from pathlib import Path
 from types import SimpleNamespace
 
 sys.stdout.reconfigure(encoding="utf-8")  # Windows 終端機預設 cp950，印不出部分符號
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
 
-from comic_agent import Storyboard, build_sd_prompt, llm, validate_storyboard  # noqa: E402
+from comic_agent import Storyboard, build_sd_prompt, llm, render, validate_storyboard  # noqa: E402
 
 SAMPLE = {
     "title": "雨天的小貓",
@@ -70,6 +71,21 @@ def main():
         print("[OK] 能擋下過多角色同框：", str(e).splitlines()[1])
 
     test_cache_only_stores_valid(bad)
+    test_render_jobs()
+
+
+def test_render_jobs():
+    """凍結分鏡 → 生圖工作清單：30 格、seed 不重複、prompt 用凍結版本。"""
+    boards = render.load_frozen_storyboards(ROOT / "data" / "storyboards")
+    assert sorted(boards) == [1, 2, 3, 4, 5]
+    jobs = list(render.iter_jobs(boards, scheme="A"))
+    assert len(jobs) == 30
+    assert len({j["seed"] for j in jobs}) == 30
+    assert render.panel_seed(3, 2) == 302
+    assert jobs[0]["prompt"] == boards[1]["sd_prompts"][0]
+    png, js = render.panel_paths("/out", jobs[7])
+    assert png.as_posix().endswith("A/story_2/panel_02.png") and js.suffix == ".json"
+    print(f"[OK] 凍結分鏡 → {len(jobs)} 個生圖工作，seed 不重複")
 
 
 class _FakeClient:

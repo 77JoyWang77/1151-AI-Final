@@ -29,6 +29,9 @@ src/comic_agent/
   schema.py       Character / Dialogue / Panel / Storyboard（pydantic）
   llm.py          OpenAI 結構化輸出 + 磁碟快取
   storyboard.py   generate_storyboard / validate_storyboard / build_sd_prompt
+  render.py       生圖設定 GenConfig、seed 規則、凍結分鏡 → 生圖工作、輸出路徑與紀錄（不 import torch）
+notebooks/
+  01_sdxl_baseline.ipynb  Colab：方案 A（prompt only）SDXL 逐格生圖，結果存 Drive、可續跑
 scripts/
   run_storyboard.py   CLI：產生分鏡並存 outputs/storyboard.json
   test_offline.py     不呼叫 API 的測試
@@ -57,7 +60,7 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 | 階段 | 狀態 |
 |---|---|
 | 1. 分鏡 Agent | **完成**：5 個實驗主題皆產出合法分鏡並凍結於 `data/storyboards/`。驗證涵蓋格數、未定義角色、每格最多 2 角色、SD prompt 粗估 ≤ 75 tokens；不合格自動重試一次、只快取合格結果 |
-| 2. Colab 跑通 SDXL 逐格生圖 | 未開始 |
+| 2. Colab 跑通 SDXL 逐格生圖 | notebook `01_sdxl_baseline.ipynb` 已寫好（語法檢查通過），**尚未在 Colab 實際執行** |
 | 3. IP-Adapter、LoRA | 未開始（課程 W12，11/24 後） |
 | 4. Reflection loop | 未開始 |
 | 5. 排版、Gradio、一致性實驗 | 未開始 |
@@ -67,6 +70,6 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 - SD prompt 長度用 `estimate_clip_tokens()` 粗估（凍結分鏡最長約 57），需在 Colab 用 CLIP tokenizer 實測；若實際超過 77，調整 `MAX_CLIP_TOKENS` 或改用 `compel`。
 - 固定服裝會與劇情衝突（例如室內仍穿雨衣）；實驗階段維持固定服裝，報告列為限制。
 - 配角（如故事 1 的媽媽）LLM 不一定定義成角色，程式無法從中文劇情偵測；主實驗只量測主角一致性。
-- 專案還不是 git repo，也還沒推上 GitHub；Colab 要靠 `git clone` 取得程式與 `data/storyboards/`，寫 notebook 前要先建 repo。
+GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 `git clone` 取得程式與 `data/storyboards/`。
 
-下一步：建立 git repo 並推上 GitHub；接著寫 Colab SDXL 生圖 notebook（`notebooks/`），讀 `data/storyboards/` 逐格生圖（里程碑 10/28–11/16）。
+下一步：commit 並 push 後，在 Colab 執行 `01_sdxl_baseline.ipynb`；確認 tokenizer 實測長度、同 seed 可重現性、每格耗時，以及方案 A 的 30 張圖（里程碑 10/28–11/16）。
