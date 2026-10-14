@@ -29,6 +29,7 @@ src/comic_agent/
   schema.py       Character / Dialogue / Panel / Storyboard（pydantic）
   llm.py          OpenAI 結構化輸出 + 磁碟快取
   storyboard.py   generate_storyboard / validate_storyboard / build_sd_prompt
+  evaluate.py     評估指標（CPU）：分 pass 一次載入一個模型、磁碟快取；含 SAM 去背的角色一致性
   render.py       生圖設定 GenConfig、seed 規則、凍結分鏡 → 生圖工作、參考圖候選、輸出路徑與紀錄（不 import torch）
 notebooks/
   01_sdxl_baseline.ipynb  Colab：方案 A（prompt only）SDXL 逐格生圖，結果存 Drive、可續跑
@@ -36,6 +37,7 @@ notebooks/
 scripts/
   run_storyboard.py   CLI：產生分鏡並存 outputs/storyboard.json
   test_offline.py     不呼叫 API 的測試
+  run_eval.py         評估 CLI：直接讀 G: 上的 Colab 結果，輸出 outputs/eval/*.csv
   build_notebooks.py  產生所有 notebooks/*.ipynb 的唯一來源（共用 cell 只寫一次、含語法檢查）；改 notebook 請改這裡再重跑
   set_art_style.py    統一替換凍結分鏡的 art_style 並重建 sd_prompts（不呼叫 LLM）
 runs/                 Colab「儲存至 GitHub」存回的已執行 notebook（含輸出，供檢視結果）
@@ -60,7 +62,7 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 - 不要提交 `.env`、`.cache/`、`outputs/`、`*.safetensors`。
 - Colab 存回 GitHub 時，路徑開頭不能有空格（OneDrive 無法同步，需用 `git mv` 修正）；Colab Secrets 的 `GH_TOKEN` 只能放 GitHub token（repo 是 public，通常不需要）。
 
-## 目前進度（2026-10-13）
+## 目前進度（2026-10-14）
 
 | 階段 | 狀態 |
 |---|---|
@@ -77,7 +79,9 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 - 配角（如故事 1 的媽媽）LLM 不一定定義成角色，程式無法從中文劇情偵測；主實驗只量測主角一致性。
 GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 `git clone` 取得程式與 `data/storyboards/`。
 
-下一步：方案 A 已以 gouache 重跑（人類角色的臉跨格差異很大，同一故事內畫風也會漂移）。因此提前做方案 B：在 Colab 執行 `02_ip_adapter.ipynb`，挑參考圖、掃描 scale、跑 30 格；看結果後再決定是否加「畫風一致性」指標（B 的參考圖也會統一畫風，是混淆變因）與 InstantStyle。之後做 reflection loop。
+評估（CPU，`scripts/run_eval.py`）已完成 A vs B@0.3 與 scale 掃描：去背後角色一致性 0.572 → 0.717（+25%，4/5 篇提升），代價為 CLIP −8.6%、構圖多樣性 −38%；細節見 `docs/research_notes.md` 7.1、7.2。
+
+下一步：依挑選規則重選故事 1、2、3 的參考圖後重跑 B（需 GPU）；排版模組（Pillow 對話框）；reflection loop；視需要加「畫風一致性」指標與 InstantStyle。
 
 方案 B 已在 Colab 跑完（參考圖 6／7／5／8／8、掃描 0.2–0.4、30 格 @0.3；結果在 Drive，本機可由 `G:\我的雲端硬碟\02 課程\1151-AI-Final\outputs\render`（Colab 為 `/content/drive/MyDrive/02 課程/1151-AI-Final`） 直接讀取）。0.3 讓臉、服裝、畫風跨格一致；參考圖的構圖、背景（含素色底色）、顏色、姿勢都會被照抄並壓過 prompt。細節與參考圖挑選規則見 `docs/research_notes.md` 第七節；建議依規則重選故事 1、2、3 的參考圖後重跑（需 GPU）。
 

@@ -3,11 +3,12 @@
 | 指標 | 模型 | 量什麼 |
 | 角色一致性 id_consistency | Grounding DINO 裁主角 → DINOv2 | 同一故事內，主角裁切兩兩 cosine 平均 |
 | 與參考圖相似 id_to_ref | 同上 | 每格主角裁切與參考圖主角裁切的 cosine 平均（方案 A 以第 1 格為錨） |
+| 去背版 *_fg | Grounding DINO 框 → SAM 去背 → DINOv2 | 同上兩項，但背景填成中性灰，只比角色本身 |
 | 圖文對齊 clip_score | CLIP ViT-B/32 | 100 × cos(圖, 該格 image_prompt) |
 | 構圖多樣性 diversity | DreamSim | 整張圖兩兩 DreamSim 距離平均；越低代表各格越像（照抄） |
 | 參考圖照抄 ref_copy | DreamSim | 每格整張圖與參考圖的 DreamSim 相似度（1 − 距離）平均 |
 
-省記憶體設計：分成 4 個 pass（偵測 → CLIP → DINOv2 → DreamSim），**一次只載入一個模型**，
+省記憶體設計：分成多個 pass（偵測 → CLIP → DINOv2 → SAM 去背 → 去背 DINOv2 → DreamSim），**一次只載入一個模型**，
 用完即釋放；每個 pass 的結果寫入磁碟快取（以檔案路徑 + 修改時間 + 大小為 key），
 中途停掉可續跑，圖重新生成也會自動重算。彙總（summarize）是純計算，可離線測試。
 """
@@ -22,7 +23,10 @@ GDINO_ID = "IDEA-Research/grounding-dino-tiny"
 DREAMSIM_TYPE = "dino_vitb16"  # 單一模型版，記憶體約為 ensemble 的 1/3
 BOX_THRESHOLD = 0.35
 TEXT_THRESHOLD = 0.25
-PASSES = ("boxes", "clip", "dino", "dreamsim")
+SAM_ID = "facebook/sam-vit-base"
+FG_FILL = (128, 128, 128)  # 去背後的背景色：中性灰，避免背景顏色影響 DINOv2
+PASSES = ("boxes", "clip", "dino", "masks", "dino_fg", "dreamsim")
+VECTOR_PASSES = ("dino", "dino_fg", "dreamsim")
 
 
 # ==== 純計算 helper（不 import torch）====
@@ -95,29 +99,35 @@ def summarize(items: list[dict], cache: dict) -> tuple[list[dict], list[dict]]:
     for (scheme, story), group in groups.items():
         panels = sorted((it for it in group if it["panel"] > 0), key=lambda it: it["panel"])
         ref = next((it for it in group if it["panel"] == 0), None)
-        crops, full = [], []
+        detected = 0
         for it in panels:
             box, det = cache["boxes"][it["key"]]
-            if box is not None:
-                crops.append(cache["dino"][it["key"]])
-            full.append(cache["dreamsim"][it["key"]])
+            detected += box is not None
             rows.append({"scheme": scheme, "story": story, "panel": it["panel"],
                          "clip_score": round(cache["clip"][f"{it['key']}|{it['text']}"], 2),
                          "detected": box is not None, "det_score": round(det, 3)})
-        if ref is not None:
-            ref_box = cache["boxes"][ref["key"]][0]
-            ref_crop = cache["dino"][ref["key"]] if ref_box is not None else None
-            ref_full = cache["dreamsim"][ref["key"]]
-            others = crops
-        else:  # 方案 A：以第 1 格的主角為錨，和其餘各格比
-            ref_crop, ref_full, others = (crops[0] if crops else None), None, crops[1:]
+
+        def identity(name):
+            """某種主角嵌入（dino = 框裁切、dino_fg = 去背）的 (一致性, 與參考圖相似)。"""
+            embs = [cache[name][it["key"]] for it in panels if it["key"] in cache.get(name, {})]
+            if ref is not None:
+                anchor, others = cache.get(name, {}).get(ref["key"]), embs
+            else:  # 方案 A：以第 1 格的主角為錨，和其餘各格比
+                anchor, others = (embs[0] if embs else None), embs[1:]
+            idc = pairwise_mean(embs)
+            return (round(idc, 4) if idc is not None else None,
+                    mean([float(e @ anchor) for e in others]) if anchor is not None else None)
+
+        full = [cache["dreamsim"][it["key"]] for it in panels]
+        ref_full = cache["dreamsim"][ref["key"]] if ref is not None else None
         div = pairwise_mean(full)
-        idc = pairwise_mean(crops)
+        idc, idr = identity("dino")
+        idc_fg, idr_fg = identity("dino_fg")
         summaries.append({
             "scheme": scheme, "story": story, "panels": len(panels),
-            "detect_rate": round(len(crops) / len(panels), 2) if panels else None,
-            "id_consistency": round(idc, 4) if idc is not None else None,
-            "id_to_ref": mean([float(e @ ref_crop) for e in others]) if ref_crop is not None else None,
+            "detect_rate": round(detected / len(panels), 2) if panels else None,
+            "id_consistency": idc, "id_to_ref": idr,
+            "id_consistency_fg": idc_fg, "id_to_ref_fg": idr_fg,
             "clip_score": mean([r["clip_score"] for r in rows if (r["scheme"], r["story"]) == (scheme, story)]),
             "diversity": round(1 - div, 4) if div is not None else None,
             "ref_copy": mean([float(e @ ref_full) for e in full]) if ref_full is not None else None,
@@ -138,7 +148,7 @@ def load_cache(cache_dir) -> dict:
     for name in PASSES:
         f = _cache_file(cache_dir, name)
         data = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
-        if name in ("dino", "dreamsim"):
+        if name in VECTOR_PASSES:
             data = {k: np.asarray(v, dtype="float32") for k, v in data.items()}
         cache[name] = data
     return cache
@@ -200,6 +210,44 @@ def _load(name, model_dir):
             return (v / v.norm()).numpy()
         return fn
 
+    if name == "masks":  # SAM：以 Grounding DINO 的框為提示分割主角，存框內的遮罩
+        import hashlib
+
+        from PIL import Image
+        from transformers import SamModel, SamProcessor
+        model, proc = SamModel.from_pretrained(SAM_ID).eval(), SamProcessor.from_pretrained(SAM_ID)
+        post = getattr(proc, "post_process_masks", None) or proc.image_processor.post_process_masks
+
+        def fn(image, it):
+            inputs = proc(image, input_boxes=[[it["box"]]], return_tensors="pt")
+            with torch.no_grad():
+                out = model(**inputs, multimask_output=True)
+            masks = post(out.pred_masks, inputs["original_sizes"], inputs["reshaped_input_sizes"])[0]
+            best = int(out.iou_scores[0, 0].argmax())
+            x0, y0, x1, y1 = (int(round(v)) for v in it["box"])
+            crop = masks[0, best].numpy()[y0:y1, x0:x1]
+            if crop.size == 0 or crop.mean() < 0.05:  # 框內幾乎沒有前景：視為分割失敗
+                return None
+            name_ = hashlib.sha1(it["key"].encode()).hexdigest()[:16] + ".png"
+            Path(it["mask_dir"]).mkdir(parents=True, exist_ok=True)
+            Image.fromarray(crop.astype("uint8") * 255).save(Path(it["mask_dir"]) / name_)
+            return name_
+        return fn
+
+    if name == "dino_fg":  # 去背：框內非主角的像素填中性灰，再算 DINOv2
+        from PIL import Image
+        from transformers import AutoImageProcessor, AutoModel
+        model, proc = AutoModel.from_pretrained(DINO_ID).eval(), AutoImageProcessor.from_pretrained(DINO_ID)
+
+        def fn(image, it):
+            crop = image.crop(tuple(int(round(v)) for v in it["box"]))
+            mask = Image.open(it["mask_path"]).convert("L").resize(crop.size)
+            fg = Image.composite(crop, Image.new("RGB", crop.size, FG_FILL), mask)
+            with torch.no_grad():
+                v = model(**proc(images=fg, return_tensors="pt")).pooler_output[0]
+            return (v / v.norm()).numpy()
+        return fn
+
     if name == "dreamsim":
         from dreamsim import dreamsim
         model, preprocess = dreamsim(pretrained=True, device="cpu", cache_dir=str(model_dir), dreamsim_type=DREAMSIM_TYPE)
@@ -215,19 +263,26 @@ def _load(name, model_dir):
 
 
 def run_passes(items, cache_dir, model_dir, log=print) -> dict:
-    """依序跑 4 個 pass，只計算快取裡沒有的部分；回傳完整快取。"""
+    """依序跑各 pass（見 PASSES），只計算快取裡沒有的部分；回傳完整快取。"""
     from PIL import Image
 
     cache = load_cache(cache_dir)
+    mask_dir = Path(cache_dir) / "masks"
     for name in PASSES:
         if name == "clip":
             todo = [it for it in items if it["text"] and f"{it['key']}|{it['text']}" not in cache["clip"]]
-        elif name == "dino":  # 只對偵測到主角的圖算裁切嵌入
+        elif name in ("dino", "masks"):  # 只對偵測到主角的圖
             todo = []
             for it in items:
                 box = cache["boxes"][it["key"]][0]
-                if box is not None and it["key"] not in cache["dino"]:
-                    todo.append({**it, "box": box})
+                if box is not None and it["key"] not in cache[name]:
+                    todo.append({**it, "box": box, "mask_dir": str(mask_dir)})
+        elif name == "dino_fg":  # 只對分割成功的圖
+            todo = []
+            for it in items:
+                mask = cache["masks"].get(it["key"])
+                if mask is not None and it["key"] not in cache["dino_fg"]:
+                    todo.append({**it, "box": cache["boxes"][it["key"]][0], "mask_path": str(mask_dir / mask)})
         else:
             todo = [it for it in items if it["key"] not in cache[name]]
         # 同一張圖（例如多個 scale 共用的參考圖）只算一次

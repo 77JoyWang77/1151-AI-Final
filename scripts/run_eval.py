@@ -22,7 +22,8 @@ from comic_agent import render  # noqa: E402
 from comic_agent.evaluate import collect_items, run_passes, summarize  # noqa: E402
 
 DEFAULT_RENDER_ROOT = "G:/我的雲端硬碟/02 課程/1151-AI-Final/outputs/render"
-METRICS = ["detect_rate", "id_consistency", "id_to_ref", "clip_score", "diversity", "ref_copy"]
+METRICS = ["detect_rate", "id_consistency", "id_consistency_fg", "id_to_ref", "id_to_ref_fg",
+           "clip_score", "diversity", "ref_copy"]
 
 
 def write_csv(path: Path, rows: list[dict]):

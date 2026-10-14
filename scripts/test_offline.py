@@ -110,12 +110,13 @@ def test_eval_helpers():
         assert len(items) == 7 and sum(it["panel"] == 0 for it in items) == 1  # 6 格 + 1 張參考圖
 
         e1, e2 = np.array([1.0, 0.0]), np.array([0.0, 1.0])
-        cache = {"boxes": {}, "clip": {}, "dino": {}, "dreamsim": {}}
+        cache = {"boxes": {}, "clip": {}, "dino": {}, "dino_fg": {}, "dreamsim": {}}
         for it in items:
             missed = it["scheme"] == "A" and it["panel"] == 3  # A 第 3 格偵測不到主角
             cache["boxes"][it["key"]] = [None, 0.0] if missed else [[0, 0, 2, 2], 0.9]
             if not missed:
                 cache["dino"][it["key"]] = e1 if it["scheme"] == "B_s0.3" or it["panel"] == 1 else e2
+                cache["dino_fg"][it["key"]] = e1  # 去背後全部相同：模擬「差異其實來自背景」
             cache["dreamsim"][it["key"]] = e1
             if it["text"]:
                 cache["clip"][f"{it['key']}|{it['text']}"] = 30.0
@@ -125,6 +126,7 @@ def test_eval_helpers():
         assert a["id_consistency"] == 0.0 and a["id_to_ref"] == 0.0 and a["ref_copy"] is None
         assert b["id_consistency"] == 1.0 and b["id_to_ref"] == 1.0 and b["ref_copy"] == 1.0
         assert b["diversity"] == 0.0 and b["clip_score"] == 30.0
+        assert a["id_consistency_fg"] == 1.0 and a["id_to_ref_fg"] == 1.0  # 去背版不受背景差異影響
     print("[OK] 評估 helper：偵測查詢、兩兩相似度、參考圖路徑、項目收集與彙總")
 
 
