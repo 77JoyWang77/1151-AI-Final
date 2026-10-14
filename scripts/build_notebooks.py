@@ -38,7 +38,7 @@ def settings_code(extra):
 # ==== 設定 ====
 REPO_URL = "https://github.com/77JoyWang77/1151-AI-Final.git"
 REPO_DIR = "/content/1151-AI-Final"
-DRIVE_ROOT = "/content/drive/MyDrive/1151-AI-Final"  # 生成結果存這裡
+DRIVE_ROOT = "/content/drive/MyDrive/02 課程/1151-AI-Final"  # 生成結果存這裡
 ''' + extra.strip("\n") + '''
 CPU_OFFLOAD = False        # 若出現 CUDA out of memory 改成 True（較慢）
 

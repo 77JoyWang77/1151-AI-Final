@@ -66,7 +66,7 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 |---|---|
 | 1. 分鏡 Agent | **完成**：5 個實驗主題皆產出合法分鏡並凍結於 `data/storyboards/`。驗證涵蓋格數、未定義角色、每格最多 2 角色、SD prompt 粗估 ≤ 75 tokens；不合格自動重試一次、只快取合格結果 |
 | 2. Colab 跑通 SDXL 逐格生圖 | 流程已在 Colab 跑通（watercolor 版 30 格：同 seed 像素差 0、每格 25 秒、實際 tokens 最長 61、實際/粗估 1.09 → `MAX_CLIP_TOKENS=68`）。畫風比較後改用 gouache，**方案 A 需以新畫風重跑** |
-| 3. IP-Adapter、LoRA | IP-Adapter（方案 B）提前進行：`02_ip_adapter.ipynb` 已寫好並在本機以假 pipe 跑通，**尚未在 Colab 執行**。LoRA 未開始 |
+| 3. IP-Adapter、LoRA | IP-Adapter（方案 B）提前進行：`02_ip_adapter.ipynb` 已在 Colab 跑完 30 格（scale 0.3），待依挑選規則重選參考圖。LoRA 未開始 |
 | 4. Reflection loop | 未開始 |
 | 5. 排版、Gradio、一致性實驗 | 未開始 |
 
@@ -79,6 +79,6 @@ GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 
 
 下一步：方案 A 已以 gouache 重跑（人類角色的臉跨格差異很大，同一故事內畫風也會漂移）。因此提前做方案 B：在 Colab 執行 `02_ip_adapter.ipynb`，挑參考圖、掃描 scale、跑 30 格；看結果後再決定是否加「畫風一致性」指標（B 的參考圖也會統一畫風，是混淆變因）與 InstantStyle。之後做 reflection loop。
 
-方案 B 首輪掃描（故事 1、3，參考圖皆用候選 #1）：IP-Adapter 讓臉、服裝、畫風跨格一致，但 scale ≥ 0.5 每格都照抄參考圖的站姿與背景，0.7 六格近乎同一張（印證 H4）；參考圖的**背景**與**顏色**也會被照抄並壓過 prompt，故參考圖須素色背景、顏色正確。已改為 `N_REF=8`、掃描 0.2–0.4。
+方案 B 已在 Colab 跑完（參考圖 6／7／5／8／8、掃描 0.2–0.4、30 格 @0.3；結果在 Drive，本機可由 `G:\我的雲端硬碟\02 課程\1151-AI-Final\outputs\render`（Colab 為 `/content/drive/MyDrive/02 課程/1151-AI-Final`） 直接讀取）。0.3 讓臉、服裝、畫風跨格一致；參考圖的構圖、背景（含素色底色）、顏色、姿勢都會被照抄並壓過 prompt。細節與參考圖挑選規則見 `docs/research_notes.md` 第七節；建議依規則重選故事 1、2、3 的參考圖後重跑（需 GPU）。
 
 watercolor 版觀察（待 gouache 重跑後確認）：單色系動物角色光靠 prompt 就相當一致，多色外觀的人類角色有屬性綁定錯置（顏色互換）；劇情關鍵物件常漏畫；shot_type 幾乎被忽略。

@@ -1,0 +1,5 @@
+# 評估指標（CPU 可跑，見 scripts/run_eval.py）
+# Windows 安裝請先設 PYTHONUTF8=1，否則 dreamsim 的 setup 會因 cp950 編碼失敗
+torch>=2.2
+transformers>=5.0
+dreamsim==0.2.1

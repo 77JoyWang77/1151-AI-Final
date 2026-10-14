@@ -73,6 +73,59 @@ def main():
 
     test_cache_only_stores_valid(bad)
     test_render_jobs()
+    test_eval_helpers()
+
+
+def test_eval_helpers():
+    """評估的純計算部分（不載入模型）。"""
+    import json as _json
+
+    import numpy as np
+
+    from comic_agent import evaluate
+
+    assert evaluate.detection_query("Young Girl, curly brown hair") == "young girl."
+    v = [np.array([1.0, 0.0]), np.array([0.0, 1.0]), np.array([1.0, 0.0])]
+    assert abs(evaluate.pairwise_mean(v) - 1 / 3) < 1e-9  # (0 + 1 + 0) / 3
+    assert evaluate.pairwise_mean(v[:1]) is None
+    with tempfile.TemporaryDirectory() as tmp:
+        for scheme, rec in [("A", {}), ("B_s0.3", {"ref_image": "refs/story_1/panel_05.png"})]:
+            d = Path(tmp) / scheme / "story_1"
+            d.mkdir(parents=True)
+            (d / "panel_01.json").write_text(_json.dumps(rec), encoding="utf-8")
+        assert evaluate.reference_path(tmp, "A", 1) is None
+        assert evaluate.reference_path(tmp, "B_s0.3", 1) == Path(tmp) / "refs/story_1/panel_05.png"
+        assert evaluate.reference_path(tmp, "B_s0.3", 2) is None
+
+        # collect_items + summarize：用假圖檔與假快取，不載入任何模型
+        from PIL import Image
+        board = {"characters": [{"appearance": "young girl, red hat"}],
+                 "panels": [{"index": i, "image_prompt": f"scene {i}"} for i in (1, 2, 3)]}
+        for scheme in ("A", "B_s0.3"):
+            for i in (1, 2, 3):
+                Image.new("RGB", (4, 4)).save(Path(tmp) / scheme / "story_1" / f"panel_{i:02d}.png")
+        (Path(tmp) / "refs/story_1").mkdir(parents=True)
+        Image.new("RGB", (4, 4)).save(Path(tmp) / "refs/story_1/panel_05.png")
+        items = evaluate.collect_items(tmp, ["A", "B_s0.3"], [1], {1: board})
+        assert len(items) == 7 and sum(it["panel"] == 0 for it in items) == 1  # 6 格 + 1 張參考圖
+
+        e1, e2 = np.array([1.0, 0.0]), np.array([0.0, 1.0])
+        cache = {"boxes": {}, "clip": {}, "dino": {}, "dreamsim": {}}
+        for it in items:
+            missed = it["scheme"] == "A" and it["panel"] == 3  # A 第 3 格偵測不到主角
+            cache["boxes"][it["key"]] = [None, 0.0] if missed else [[0, 0, 2, 2], 0.9]
+            if not missed:
+                cache["dino"][it["key"]] = e1 if it["scheme"] == "B_s0.3" or it["panel"] == 1 else e2
+            cache["dreamsim"][it["key"]] = e1
+            if it["text"]:
+                cache["clip"][f"{it['key']}|{it['text']}"] = 30.0
+        rows, summ = evaluate.summarize(items, cache)
+        a, b = {s["scheme"]: s for s in summ}["A"], {s["scheme"]: s for s in summ}["B_s0.3"]
+        assert len(rows) == 6 and a["detect_rate"] == 0.67 and b["detect_rate"] == 1.0
+        assert a["id_consistency"] == 0.0 and a["id_to_ref"] == 0.0 and a["ref_copy"] is None
+        assert b["id_consistency"] == 1.0 and b["id_to_ref"] == 1.0 and b["ref_copy"] == 1.0
+        assert b["diversity"] == 0.0 and b["clip_score"] == 30.0
+    print("[OK] 評估 helper：偵測查詢、兩兩相似度、參考圖路徑、項目收集與彙總")
 
 
 def test_render_jobs():
