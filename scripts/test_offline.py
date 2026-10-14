@@ -76,6 +76,43 @@ def main():
     test_eval_helpers()
     test_layout()
     test_reflect()
+    test_app_logic()
+
+
+def test_app_logic():
+    """介面邏輯：台詞表 ↔ 分鏡、錯誤提示、示範生圖（找得到圖 vs 占位圖）、組成整本書。"""
+    from PIL import Image
+
+    from comic_agent import app_logic
+
+    rows = app_logic.dialogue_rows(SAMPLE)
+    assert rows == [[1, "narrator", "下雨的星期天。"], [2, "mei", "你迷路了嗎？"]]
+    edited = app_logic.apply_dialogue_rows(SAMPLE, [[1, "narrator", "改過的旁白"], [2, "mei", ""], [2, "kitten", "喵"]])
+    assert edited["panels"][0]["dialogue"][0]["text"] == "改過的旁白"
+    assert edited["panels"][1]["dialogue"] == [{"speaker": "kitten", "text": "喵"}]  # 空白台詞被刪除
+    assert SAMPLE["panels"][0]["dialogue"][0]["text"] == "下雨的星期天。"  # 不改到原本的分鏡
+    for bad in ([[1, "dog", "汪"]], [[9, "mei", "嗨"]]):
+        try:
+            app_logic.apply_dialogue_rows(SAMPLE, bad)
+            raise AssertionError("應該要擋下不存在的說話者或格數")
+        except ValueError:
+            pass
+    assert "雨天的小貓" in app_logic.storyboard_markdown(SAMPLE)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        d = Path(tmp) / "B_s0.3" / "story_1"
+        d.mkdir(parents=True)
+        Image.new("RGB", (1024, 1024), (10, 200, 10)).save(d / "panel_01.png")
+        r = app_logic.DemoRenderer(tmp, "B_s0.3")
+        example = {**SAMPLE, "_story_no": 1}
+        assert r.panel(example, 1).getpixel((5, 5)) == (10, 200, 10)  # 範例故事：讀已生成的圖
+        assert r.panel(example, 2).getpixel((5, 5)) == app_logic.PLACEHOLDER_COLORS[0]  # 缺圖：占位圖
+        assert r.panel(example, 1, attempt=1).getpixel((5, 5)) == app_logic.PLACEHOLDER_COLORS[1]  # 重生：換占位圖
+        assert r.panel(SAMPLE, 1).getpixel((5, 5)) == app_logic.PLACEHOLDER_COLORS[0]  # 新故事：占位圖
+        images = {p["index"]: r.panel(example, p["index"]) for p in SAMPLE["panels"]}
+        pages, pdf = app_logic.build_book(SAMPLE, images, {}, Path(tmp) / "book")
+        assert len(pages) == 3 and pdf.exists() and pdf.stat().st_size > 0  # 封面 + 2 頁
+    print("[OK] 介面邏輯：台詞表 ↔ 分鏡、錯誤提示、示範生圖、組成整本書")
 
 
 def test_reflect():

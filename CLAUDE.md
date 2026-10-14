@@ -30,6 +30,8 @@ src/comic_agent/
   schema.py       Character / Dialogue / Panel / Storyboard（pydantic）
   llm.py          OpenAI 結構化輸出 + 磁碟快取
   storyboard.py   generate_storyboard / validate_storyboard / build_sd_prompt
+  app.py          Gradio 介面（主題／範例 → 分鏡與台詞表 → 生圖 → 單格重生 → 排版下載）；renderer 可抽換
+  app_logic.py    介面背後的邏輯（不 import gradio）：台詞表 ↔ 分鏡、DemoRenderer（本機無 GPU：讀 Drive 圖或占位圖）、組書
   evaluate.py     評估指標（CPU）：分 pass 一次載入一個模型、磁碟快取；含 SAM 去背的角色一致性
   layout.py       排版（Pillow）：台詞 → 對話框（尾巴指向說話者頭部、避開臉）、旁白 → 圖下方旁白區、封面、PDF
   reflect.py      Reflection：GPT（gpt-4.1）看圖回報事實，decide() 依規則決定 pass／revise_prompt／reseed；reflection_loop() 為不含模型的重生流程
@@ -41,6 +43,7 @@ notebooks/
 scripts/
   run_storyboard.py   CLI：產生分鏡並存 outputs/storyboard.json
   test_offline.py     不呼叫 API 的測試
+  run_app.py          啟動 Gradio（本機示範模式；--share 產生公開網址）
   make_book.py        排版 CLI：讀 G: 上的圖 + 評估快取的主角框 → outputs/books/<scheme>/story_N/（PNG + PDF）
   run_reflect.py      Reflection CLI：逐格看圖檢查，輸出 outputs/reflect/reflect_<scheme>.csv
   run_eval.py         評估 CLI：直接讀 G: 上的 Colab 結果，輸出 outputs/eval/*.csv
@@ -76,7 +79,7 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 | 2. Colab 跑通 SDXL 逐格生圖 | 流程已在 Colab 跑通（watercolor 版 30 格：同 seed 像素差 0、每格 25 秒、實際 tokens 最長 61、實際/粗估 1.09 → `MAX_CLIP_TOKENS=68`）。畫風比較後改用 gouache，**方案 A 需以新畫風重跑** |
 | 3. IP-Adapter、LoRA | IP-Adapter（方案 B）提前進行：`02_ip_adapter.ipynb` 已在 Colab 跑完 30 格（scale 0.3），待依挑選規則重選參考圖。LoRA 未開始 |
 | 4. Reflection loop | 看圖檢查完成（gpt-4.1，A／B 各 30 格，抽查動作判斷合理 94%）；重生 notebook `03_reflect_regen.ipynb` 已寫好並以假 GPU／假 GPT 乾跑通過，**尚未在 Colab 執行** |
-| 5. 排版、Gradio、一致性實驗 | 排版完成（`make_book.py`，A 與 B@0.3 各 5 本）；一致性實驗 A vs B 完成；Gradio 未開始 |
+| 5. 排版、Gradio、一致性實驗 | 排版完成（`make_book.py`，A 與 B@0.3 各 5 本）；一致性實驗 A vs B 完成；Gradio 骨架完成（本機示範模式，已用 gradio_client 走完整流程）；SDXL renderer 未接（需 GPU） |
 
 已知待處理：
 

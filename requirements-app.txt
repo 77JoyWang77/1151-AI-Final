@@ -1,0 +1,2 @@
+# Gradio 介面（scripts/run_app.py）
+gradio>=6.0
