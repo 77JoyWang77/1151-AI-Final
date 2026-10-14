@@ -300,3 +300,75 @@ def run_passes(items, cache_dir, model_dir, log=print) -> dict:
         del fn
         gc.collect()  # 釋放這個 pass 的模型，再載入下一個
     return cache
+
+
+# ==== 配角位置（給排版的對話框尾巴用）====
+
+SIDE_CACHE = "char_boxes"  # {image_key: {角色 id: [box|None, score]}}
+SAME_OBJECT_IOU = 0.6  # 配角框與主角框重疊超過這個值，視為偵測到的其實是主角
+
+
+def _read_json(cache_dir, name) -> dict:
+    """只讀單一快取檔（不像 load_cache 會載入所有向量）。"""
+    f = _cache_file(cache_dir, name)
+    return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
+
+
+def iou(a, b) -> float:
+    inter = max(min(a[2], b[2]) - max(a[0], b[0]), 0) * max(min(a[3], b[3]) - max(a[1], b[1]), 0)
+    union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
+    return inter / union if union > 0 else 0.0
+
+
+def detect_side_characters(render_root, schemes, stories, boards, cache_dir, model_dir, log=print) -> dict:
+    """對每格 characters 中的配角跑 Grounding DINO，結果快取在 char_boxes.json；回傳整個快取。
+
+    需要先跑過評估（boxes.json 有主角框），用來排除「其實抓到主角」的配角框。
+    """
+    from PIL import Image
+
+    f = _cache_file(cache_dir, SIDE_CACHE)
+    cache = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
+    hero_boxes = _read_json(cache_dir, "boxes")
+    todo = []
+    for scheme in schemes:
+        for story_no in stories:
+            board = boards[story_no]
+            looks = {c["id"]: c["appearance"] for c in board["characters"]}
+            hero = board["characters"][0]["id"]
+            for panel in board["panels"]:
+                png = Path(render_root) / scheme / f"story_{story_no}" / f"panel_{panel['index']:02d}.png"
+                if not png.exists():
+                    continue
+                key = image_key(png)
+                for cid in panel["characters"]:
+                    if cid != hero and cid not in cache.get(key, {}):
+                        todo.append({"key": key, "path": str(png), "cid": cid, "query": detection_query(looks[cid])})
+    log(f"[配角] 需偵測 {len(todo)} 個（其餘已在快取）")
+    if todo:
+        fn = _load("boxes", model_dir)
+        for k, it in enumerate(todo, 1):
+            box, score = fn(Image.open(it["path"]).convert("RGB"), it)
+            hero_box = hero_boxes.get(it["key"], [None])[0]
+            if box is not None and hero_box is not None and iou(box, hero_box) > SAME_OBJECT_IOU:
+                box, score = None, 0.0
+            cache.setdefault(it["key"], {})[it["cid"]] = [box, score]
+            log(f"[配角] {k}/{len(todo)} {Path(it['path']).parent.name}/{Path(it['path']).name} {it['cid']}："
+                + ("找到" if box else "未找到"))
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps(cache), encoding="utf-8")
+        del fn
+        gc.collect()
+    return cache
+
+
+def character_boxes(png, board: dict, cache_dir) -> dict:
+    """某張圖中各角色的位置框 {角色 id: box}：主角取自 boxes.json，配角取自 char_boxes.json。"""
+    key = image_key(png)
+    out = {}
+    hero = _read_json(cache_dir, "boxes").get(key, [None])[0]
+    if hero is not None:
+        out[board["characters"][0]["id"]] = hero
+    side = _read_json(cache_dir, SIDE_CACHE).get(key, {})
+    out.update({cid: v[0] for cid, v in side.items() if v[0] is not None})
+    return out

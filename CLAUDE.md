@@ -44,6 +44,7 @@ scripts/
   run_storyboard.py   CLI：產生分鏡並存 outputs/storyboard.json
   test_offline.py     不呼叫 API 的測試
   run_app.py          啟動 Gradio（本機示範模式；--share 產生公開網址）
+  detect_characters.py  偵測配角位置（Grounding DINO，CPU）→ .cache/eval/char_boxes.json，讓配角的對話框也有尾巴
   make_book.py        排版 CLI：讀 G: 上的圖 + 評估快取的主角框 → outputs/books/<scheme>/story_N/（PNG + PDF）
   run_reflect.py      Reflection CLI：逐格看圖檢查，輸出 outputs/reflect/reflect_<scheme>.csv
   run_eval.py         評估 CLI：直接讀 G: 上的 Colab 結果，輸出 outputs/eval/*.csv
@@ -89,8 +90,6 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 `git clone` 取得程式與 `data/storyboards/`。
 
 評估（CPU，`scripts/run_eval.py`）已完成 A vs B@0.3 與 scale 掃描：去背後角色一致性 0.572 → 0.717（+25%，4/5 篇提升），代價為 CLIP −8.6%、構圖多樣性 −38%；細節見 `docs/research_notes.md` 7.1、7.2。
-
-排版已知限制：只有主角有位置框，配角（如故事 3 的小貓）說話時對話框沒有尾巴；可讓 Grounding DINO 也偵測配角補上。
 
 下一步：依挑選規則重選故事 1、2、3 的參考圖後重跑 B（需 GPU）；Colab 執行 `03_reflect_regen.ipynb`（先對重跑後的 B，預估 0.5–0.75 美金），比較 `<方案>` 與 `<方案>_R` 做 reflection 消融；視需要加「畫風一致性」指標與 InstantStyle。
 

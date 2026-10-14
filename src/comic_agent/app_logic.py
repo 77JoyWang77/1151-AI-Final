@@ -10,8 +10,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from . import layout, render
-from .evaluate import image_key
+from . import layout
+from .evaluate import character_boxes
 
 PLACEHOLDER_COLORS = [(232, 222, 205), (214, 228, 222), (226, 215, 230), (230, 226, 206)]
 
@@ -76,10 +76,9 @@ def placeholder_image(board: dict, panel_index: int, attempt: int = 0, size: int
 class DemoRenderer:
     """本機示範：範例故事（帶 _story_no）讀 Drive 上已生成的圖，其餘情況畫占位圖。"""
 
-    def __init__(self, render_root: str | Path, scheme: str = "B_s0.3", boxes_cache: str | Path | None = None):
+    def __init__(self, render_root: str | Path, scheme: str = "B_s0.3", cache_dir: str | Path | None = None):
         self.render_root, self.scheme = Path(render_root), scheme
-        f = Path(boxes_cache) if boxes_cache else None
-        self.boxes = json.loads(f.read_text(encoding="utf-8")) if f and f.exists() else {}
+        self.cache_dir = cache_dir  # 評估快取（角色位置）；None 表示不畫對話框尾巴
 
     def _path(self, board, panel_index):
         story_no = board.get("_story_no")
@@ -93,10 +92,9 @@ class DemoRenderer:
         return Image.open(png).convert("RGB") if png else placeholder_image(board, panel_index, attempt)
 
     def speaker_boxes(self, board: dict, panel_index: int, attempt: int = 0) -> dict:
-        """主角的位置框（取自評估快取）；沒有就回傳空 dict（對話框不畫尾巴）。"""
+        """各角色的位置框（取自評估快取：主角 boxes.json、配角 char_boxes.json）；沒有就回傳空 dict。"""
         png = self._path(board, panel_index) if attempt == 0 else None
-        box = self.boxes.get(image_key(png), [None])[0] if png else None
-        return {render.protagonist(board)["id"]: box} if box else {}
+        return character_boxes(png, board, self.cache_dir) if png and self.cache_dir else {}
 
 
 # ==== 排版 ====

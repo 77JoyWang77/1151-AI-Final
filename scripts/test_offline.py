@@ -268,6 +268,20 @@ def test_eval_helpers():
         assert a["id_consistency_fg"] == 1.0 and a["id_to_ref_fg"] == 1.0  # 去背版不受背景差異影響
     print("[OK] 評估 helper：偵測查詢、兩兩相似度、參考圖路徑、項目收集與彙總")
 
+    # 配角位置：IoU 與主角＋配角框的合併
+    assert abs(evaluate.iou((0, 0, 10, 10), (5, 0, 15, 10)) - 1 / 3) < 1e-9
+    assert evaluate.iou((0, 0, 1, 1), (2, 2, 3, 3)) == 0
+    with tempfile.TemporaryDirectory() as tmp:
+        png = Path(tmp) / "p.png"
+        Image.new("RGB", (4, 4)).save(png)
+        key = evaluate.image_key(png)
+        (Path(tmp) / "boxes.json").write_text(_json.dumps({key: [[0, 0, 2, 2], 0.9]}), encoding="utf-8")
+        (Path(tmp) / "char_boxes.json").write_text(
+            _json.dumps({key: {"kitten": [[2, 2, 4, 4], 0.8], "dog": [None, 0.0]}}), encoding="utf-8")
+        board = {"characters": [{"id": "boy"}, {"id": "kitten"}, {"id": "dog"}]}
+        assert evaluate.character_boxes(png, board, tmp) == {"boy": [0, 0, 2, 2], "kitten": [2, 2, 4, 4]}
+    print("[OK] 配角位置：IoU、主角與配角框合併（未偵測到的不納入）")
+
 
 def test_render_jobs():
     """凍結分鏡 → 生圖工作清單：30 格、seed 不重複、prompt 用凍結版本。"""

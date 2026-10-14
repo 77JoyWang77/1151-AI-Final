@@ -42,7 +42,7 @@ def main():
     ap.add_argument("--port", type=int, default=7860)
     args = ap.parse_args()
 
-    renderer = DemoRenderer(args.render_root, args.scheme, ROOT / ".cache" / "eval" / "boxes.json")
+    renderer = DemoRenderer(args.render_root, args.scheme, ROOT / ".cache" / "eval")
     app = build_app(renderer, load_examples(), make_storyboard)
     app.launch(share=args.share, server_port=args.port)
 
