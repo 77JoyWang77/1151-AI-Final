@@ -32,6 +32,7 @@ src/comic_agent/
   storyboard.py   generate_storyboard / validate_storyboard / build_sd_prompt
   app.py          Gradio 介面（主題／範例 → 分鏡與台詞表 → 生圖 → 單格重生 → 排版下載）；renderer 可抽換
   app_logic.py    介面背後的邏輯（不 import gradio）：台詞表 ↔ 分鏡、DemoRenderer（本機無 GPU：讀 Drive 圖或占位圖）、組書
+  human_eval.py   人工抽查：固定抽 8 個位置（各方案相同）、盲測順序、存檔續評、Cohen's kappa、Spearman
   evaluate.py     評估指標（CPU）：分 pass 一次載入一個模型、磁碟快取；含 SAM 去背的角色一致性
   layout.py       排版（Pillow）：台詞 → 對話框（尾巴指向說話者頭部、避開臉）、旁白 → 圖下方旁白區、封面、PDF
   reflect.py      Reflection：GPT（gpt-4.1）看圖回報事實，decide() 依規則決定 pass／revise_prompt／reseed；reflection_loop() 為不含模型的重生流程
@@ -43,6 +44,8 @@ notebooks/
 scripts/
   run_storyboard.py   CLI：產生分鏡並存 outputs/storyboard.json
   test_offline.py     不呼叫 API 的測試
+  run_rating.py       人工抽查評分介面（盲測；存 data/human_eval/ratings.csv，可續評）
+  analyze_ratings.py  各方案人評平均、人 vs GPT 一致率與 kappa、人評 vs 指標等級相關
   run_app.py          啟動 Gradio（本機示範模式；--share 產生公開網址）
   detect_characters.py  偵測配角位置（Grounding DINO，CPU）→ .cache/eval/char_boxes.json，讓配角的對話框也有尾巴
   make_book.py        排版 CLI：讀 G: 上的圖 + 評估快取的主角框 → outputs/books/<scheme>/story_N/（PNG + PDF）
@@ -53,6 +56,7 @@ scripts/
 runs/                 Colab「儲存至 GitHub」存回的已執行 notebook（含輸出，供檢視結果）
 docs/proposal.md      企畫書（主版本，線上版已停止更新）
 docs/research_notes.md  相關研究調查、採用／不採用理由、待確認清單
+data/human_eval/      人工抽查評分（ratings.csv，研究資料，納入版本控制）
 data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Colab 讀取；不要修改或重生）
 ```
 
@@ -90,6 +94,8 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 `git clone` 取得程式與 `data/storyboards/`。
 
 評估（CPU，`scripts/run_eval.py`）已完成 A vs B@0.3 與 scale 掃描：去背後角色一致性 0.572 → 0.717（+25%，4/5 篇提升），代價為 CLIP −8.6%、構圖多樣性 −38%；細節見 `docs/research_notes.md` 7.1、7.2。
+
+待使用者做：`python scripts/run_rating.py` 評 16 張（A 與 B_s0.3 的同樣 8 格），再跑 `analyze_ratings.py`。
 
 下一步：依挑選規則重選故事 1、2、3 的參考圖後重跑 B（需 GPU）；Colab 執行 `03_reflect_regen.ipynb`（先對重跑後的 B，預估 0.5–0.75 美金），比較 `<方案>` 與 `<方案>_R` 做 reflection 消融；視需要加「畫風一致性」指標與 InstantStyle。
 

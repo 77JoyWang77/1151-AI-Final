@@ -77,6 +77,31 @@ def main():
     test_layout()
     test_reflect()
     test_app_logic()
+    test_human_eval()
+
+
+def test_human_eval():
+    """人工抽查：抽樣固定且各方案相同、盲測順序、存檔續評、kappa 與等級相關。"""
+    from comic_agent import human_eval as he
+
+    boards = render.load_frozen_storyboards(ROOT / "data" / "storyboards")
+    pos = he.sample_positions(boards)
+    assert len(pos) == 8 and pos == he.sample_positions(boards)  # 可重現
+    queue = he.rating_queue(["A", "B_s0.3"], pos)
+    assert len(queue) == 16 and {(q["story"], q["panel"]) for q in queue} == set(pos)
+    assert queue != sorted(queue, key=lambda q: (q["scheme"], q["story"], q["panel"]))  # 已打亂
+    with tempfile.TemporaryDirectory() as tmp:
+        f = Path(tmp) / "r.csv"
+        he.append_rating(f, "Joy", queue[0], 4, 5, "臉很像")
+        he.append_rating(f, "Joy", queue[1], 2, 3)
+        rs = he.load_ratings(f)
+        assert [r["identity"] for r in rs] == [4, 2] and rs[0]["note"] == "臉很像"
+        assert he.pending(queue, rs, "Joy") == queue[2:] and len(he.pending(queue, rs, "Other")) == 16
+    assert he.cohen_kappa([True, False, True, False], [True, False, True, False]) == 1.0
+    assert abs(he.cohen_kappa([True, True, False, False], [True, False, True, False])) < 1e-9  # 只是偶然一致
+    assert abs(he.spearman([1, 2, 3, 4], [10, 20, 30, 40]) - 1) < 1e-9
+    assert abs(he.spearman([1, 2, 3, 4], [4, 3, 2, 1]) + 1) < 1e-9
+    print("[OK] 人工抽查：固定抽樣、盲測順序、存檔續評、kappa 與等級相關")
 
 
 def test_app_logic():
