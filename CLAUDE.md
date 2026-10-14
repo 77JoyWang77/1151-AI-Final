@@ -30,6 +30,7 @@ src/comic_agent/
   llm.py          OpenAI 結構化輸出 + 磁碟快取
   storyboard.py   generate_storyboard / validate_storyboard / build_sd_prompt
   evaluate.py     評估指標（CPU）：分 pass 一次載入一個模型、磁碟快取；含 SAM 去背的角色一致性
+  layout.py       排版（Pillow）：台詞 → 對話框（尾巴指向說話者頭部、避開臉）、旁白 → 圖下方旁白區、封面、PDF
   render.py       生圖設定 GenConfig、seed 規則、凍結分鏡 → 生圖工作、參考圖候選、輸出路徑與紀錄（不 import torch）
 notebooks/
   01_sdxl_baseline.ipynb  Colab：方案 A（prompt only）SDXL 逐格生圖，結果存 Drive、可續跑
@@ -37,6 +38,7 @@ notebooks/
 scripts/
   run_storyboard.py   CLI：產生分鏡並存 outputs/storyboard.json
   test_offline.py     不呼叫 API 的測試
+  make_book.py        排版 CLI：讀 G: 上的圖 + 評估快取的主角框 → outputs/books/<scheme>/story_N/（PNG + PDF）
   run_eval.py         評估 CLI：直接讀 G: 上的 Colab 結果，輸出 outputs/eval/*.csv
   build_notebooks.py  產生所有 notebooks/*.ipynb 的唯一來源（共用 cell 只寫一次、含語法檢查）；改 notebook 請改這裡再重跑
   set_art_style.py    統一替換凍結分鏡的 art_style 並重建 sd_prompts（不呼叫 LLM）
@@ -70,7 +72,7 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 | 2. Colab 跑通 SDXL 逐格生圖 | 流程已在 Colab 跑通（watercolor 版 30 格：同 seed 像素差 0、每格 25 秒、實際 tokens 最長 61、實際/粗估 1.09 → `MAX_CLIP_TOKENS=68`）。畫風比較後改用 gouache，**方案 A 需以新畫風重跑** |
 | 3. IP-Adapter、LoRA | IP-Adapter（方案 B）提前進行：`02_ip_adapter.ipynb` 已在 Colab 跑完 30 格（scale 0.3），待依挑選規則重選參考圖。LoRA 未開始 |
 | 4. Reflection loop | 未開始 |
-| 5. 排版、Gradio、一致性實驗 | 未開始 |
+| 5. 排版、Gradio、一致性實驗 | 排版完成（`make_book.py`，A 與 B@0.3 各 5 本）；一致性實驗 A vs B 完成；Gradio 未開始 |
 
 已知待處理：
 
@@ -81,7 +83,9 @@ GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 
 
 評估（CPU，`scripts/run_eval.py`）已完成 A vs B@0.3 與 scale 掃描：去背後角色一致性 0.572 → 0.717（+25%，4/5 篇提升），代價為 CLIP −8.6%、構圖多樣性 −38%；細節見 `docs/research_notes.md` 7.1、7.2。
 
-下一步：依挑選規則重選故事 1、2、3 的參考圖後重跑 B（需 GPU）；排版模組（Pillow 對話框）；reflection loop；視需要加「畫風一致性」指標與 InstantStyle。
+排版已知限制：只有主角有位置框，配角（如故事 3 的小貓）說話時對話框沒有尾巴；可讓 Grounding DINO 也偵測配角補上。
+
+下一步：依挑選規則重選故事 1、2、3 的參考圖後重跑 B（需 GPU）；reflection loop；視需要加「畫風一致性」指標與 InstantStyle。
 
 方案 B 已在 Colab 跑完（參考圖 6／7／5／8／8、掃描 0.2–0.4、30 格 @0.3；結果在 Drive，本機可由 `G:\我的雲端硬碟\02 課程\1151-AI-Final\outputs\render`（Colab 為 `/content/drive/MyDrive/02 課程/1151-AI-Final`） 直接讀取）。0.3 讓臉、服裝、畫風跨格一致；參考圖的構圖、背景（含素色底色）、顏色、姿勢都會被照抄並壓過 prompt。細節與參考圖挑選規則見 `docs/research_notes.md` 第七節；建議依規則重選故事 1、2、3 的參考圖後重跑（需 GPU）。
 

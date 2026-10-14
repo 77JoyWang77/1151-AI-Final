@@ -74,6 +74,35 @@ def main():
     test_cache_only_stores_valid(bad)
     test_render_jobs()
     test_eval_helpers()
+    test_layout()
+
+
+def test_layout():
+    """排版：避頭點、對話框尾巴幾何、避開臉部、頁面尺寸一致。"""
+    from PIL import Image
+
+    from comic_agent import layout
+
+    font = layout.load_font(40)
+    lines = layout.wrap_text("媽媽，我們一起蓋城堡吧！", font, font.getlength("媽媽，我們一起蓋城堡"))
+    assert len(lines) == 2 and all(ln[0] not in layout.NO_LINE_START for ln in lines), lines
+
+    rect = (100, 100, 300, 180)
+    tail = layout.bubble_tail(rect, head=(200, 400), pad=20, half=10, max_len=200)
+    assert tail[2][1] > rect[3] and tail[2][1] < 400  # 尖端在框下方、頭部之前
+    assert layout.bubble_tail(rect, head=(150, 150), pad=20, half=10, max_len=200) is None  # 頭在框內
+
+    face = (0, 0, 300, 300)  # 左上角是臉，對話框應放右上
+    r = layout.place_bubble((200, 80), (1024, 1024), head=(150, 100), avoid=[face])
+    assert layout._overlap(r, face) == 0, r
+
+    panel = {"dialogue": [{"speaker": "mei", "text": "你迷路了嗎？"}, {"speaker": "narrator", "text": "下雨的星期天。"}]}
+    img = Image.new("RGB", (1024, 1024), (90, 140, 200))
+    p1 = layout.compose_page(img, panel, {"mei": (400, 300, 700, 1000)}, page_no=1)
+    p2 = layout.compose_page(img, {"dialogue": []}, page_no=2)
+    cover = layout.compose_cover(img, "雨天的小貓", size=p1.size)
+    assert p1.size == p2.size == cover.size and p1.height > 1024
+    print("[OK] 排版：避頭點、對話框尾巴、避開臉部、頁面尺寸一致")
 
 
 def test_eval_helpers():
