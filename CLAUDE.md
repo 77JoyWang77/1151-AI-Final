@@ -19,7 +19,8 @@
 
 - LLM：OpenAI API，模型由 `.env` 的 `OPENAI_MODEL` 控制（預設 `gpt-4.1-mini`）。預算約 5 美金，避免不必要的呼叫。
 - 結構化輸出：`client.responses.parse(..., text_format=PydanticModel)`。
-- 所有 LLM 呼叫經過 `src/comic_agent/llm.py` 的 `structured_call()`，自帶磁碟快取 `.cache/llm/`。
+- 所有 LLM 呼叫經過 `src/comic_agent/llm.py` 的 `structured_call()`，自帶磁碟快取 `.cache/llm/`；可附圖（`images=`）、可設 temperature。
+- Reflection 評審用 `gpt-4.1`（mini 會漏看明顯物件）；分鏡仍用 `.env` 的 `OPENAI_MODEL`。累計 API 花費約 0.7 美金（2026-10-14）。
 - 圖像：HuggingFace `diffusers`、`peft`（LoRA）、`open_clip`。
 
 ## 專案結構
@@ -31,6 +32,7 @@ src/comic_agent/
   storyboard.py   generate_storyboard / validate_storyboard / build_sd_prompt
   evaluate.py     評估指標（CPU）：分 pass 一次載入一個模型、磁碟快取；含 SAM 去背的角色一致性
   layout.py       排版（Pillow）：台詞 → 對話框（尾巴指向說話者頭部、避開臉）、旁白 → 圖下方旁白區、封面、PDF
+  reflect.py      Reflection：GPT（gpt-4.1）看圖回報事實，decide() 依規則決定 pass／revise_prompt／reseed
   render.py       生圖設定 GenConfig、seed 規則、凍結分鏡 → 生圖工作、參考圖候選、輸出路徑與紀錄（不 import torch）
 notebooks/
   01_sdxl_baseline.ipynb  Colab：方案 A（prompt only）SDXL 逐格生圖，結果存 Drive、可續跑
@@ -39,6 +41,7 @@ scripts/
   run_storyboard.py   CLI：產生分鏡並存 outputs/storyboard.json
   test_offline.py     不呼叫 API 的測試
   make_book.py        排版 CLI：讀 G: 上的圖 + 評估快取的主角框 → outputs/books/<scheme>/story_N/（PNG + PDF）
+  run_reflect.py      Reflection CLI：逐格看圖檢查，輸出 outputs/reflect/reflect_<scheme>.csv
   run_eval.py         評估 CLI：直接讀 G: 上的 Colab 結果，輸出 outputs/eval/*.csv
   build_notebooks.py  產生所有 notebooks/*.ipynb 的唯一來源（共用 cell 只寫一次、含語法檢查）；改 notebook 請改這裡再重跑
   set_art_style.py    統一替換凍結分鏡的 art_style 並重建 sd_prompts（不呼叫 LLM）
@@ -71,7 +74,7 @@ data/storyboards/     凍結的 5 份實驗分鏡（納入版本控制，供 Col
 | 1. 分鏡 Agent | **完成**：5 個實驗主題皆產出合法分鏡並凍結於 `data/storyboards/`。驗證涵蓋格數、未定義角色、每格最多 2 角色、SD prompt 粗估 ≤ 75 tokens；不合格自動重試一次、只快取合格結果 |
 | 2. Colab 跑通 SDXL 逐格生圖 | 流程已在 Colab 跑通（watercolor 版 30 格：同 seed 像素差 0、每格 25 秒、實際 tokens 最長 61、實際/粗估 1.09 → `MAX_CLIP_TOKENS=68`）。畫風比較後改用 gouache，**方案 A 需以新畫風重跑** |
 | 3. IP-Adapter、LoRA | IP-Adapter（方案 B）提前進行：`02_ip_adapter.ipynb` 已在 Colab 跑完 30 格（scale 0.3），待依挑選規則重選參考圖。LoRA 未開始 |
-| 4. Reflection loop | 未開始 |
+| 4. Reflection loop | 看圖檢查完成（gpt-4.1，A／B 各 30 格，抽查動作判斷合理 94%）；依結果重生的 Colab 步驟未做（需 GPU） |
 | 5. 排版、Gradio、一致性實驗 | 排版完成（`make_book.py`，A 與 B@0.3 各 5 本）；一致性實驗 A vs B 完成；Gradio 未開始 |
 
 已知待處理：
@@ -85,7 +88,7 @@ GitHub：<https://github.com/77JoyWang77/1151-AI-Final>（`main`），Colab 以 
 
 排版已知限制：只有主角有位置框，配角（如故事 3 的小貓）說話時對話框沒有尾巴；可讓 Grounding DINO 也偵測配角補上。
 
-下一步：依挑選規則重選故事 1、2、3 的參考圖後重跑 B（需 GPU）；reflection loop；視需要加「畫風一致性」指標與 InstantStyle。
+下一步：依挑選規則重選故事 1、2、3 的參考圖後重跑 B（需 GPU）；Colab 上依 reflect 結果重生（revise_prompt 用改寫的 image_prompt、reseed 換 seed，每格最多 3 次）；視需要加「畫風一致性」指標與 InstantStyle。
 
 方案 B 已在 Colab 跑完（參考圖 6／7／5／8／8、掃描 0.2–0.4、30 格 @0.3；結果在 Drive，本機可由 `G:\我的雲端硬碟\02 課程\1151-AI-Final\outputs\render`（Colab 為 `/content/drive/MyDrive/02 課程/1151-AI-Final`） 直接讀取）。0.3 讓臉、服裝、畫風跨格一致；參考圖的構圖、背景（含素色底色）、顏色、姿勢都會被照抄並壓過 prompt。細節與參考圖挑選規則見 `docs/research_notes.md` 第七節；建議依規則重選故事 1、2、3 的參考圖後重跑（需 GPU）。
 

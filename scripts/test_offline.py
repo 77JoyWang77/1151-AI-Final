@@ -75,6 +75,56 @@ def main():
     test_render_jobs()
     test_eval_helpers()
     test_layout()
+    test_reflect()
+
+
+def test_reflect():
+    """reflection：decide() 的規則，以及看圖呼叫會附上圖、圖的內容是快取 key 的一部分。"""
+    from PIL import Image
+
+    from comic_agent import reflect
+    from comic_agent.reflect import AttributeCheck as A, ElementCheck as E, PanelReview
+
+    def review(attrs=("match",) * 4, present=(True, True), problems=(), revised=""):
+        return PanelReview(attributes=[A(attribute=f"a{i}", status=s) for i, s in enumerate(attrs)],
+                           elements=[E(element=f"e{i}", kind="object", status="present" if p else "absent")
+                                     for i, p in enumerate(present)],
+                           problems=list(problems), revised_image_prompt=revised)
+
+    assert reflect.decide(review())[0] == "pass"
+    assert reflect.decide(review(present=(True, False), revised="lily building sandcastle"))[0] == "revise_prompt"
+    assert reflect.decide(review(present=(True, False)))[0] == "reseed"  # 缺漏但沒給改寫
+    assert reflect.decide(review(attrs=("match", "mismatch", "mismatch", "match")))[0] == "reseed"  # 2/4 > 0.3
+    assert reflect.decide(review(attrs=("mismatch", "not_visible", "not_visible", "match", "match", "match", "match")))[0] == "pass"  # 1/5
+    assert reflect.decide(review(problems=[reflect.Problem(kind="duplicate_character", detail="兩隻小貓")]))[0] == "reseed"
+    smile = PanelReview(attributes=[], elements=[E(element="微笑", kind="expression", status="absent"),
+                                               E(element="螃蟹", kind="object", status="cannot_tell")],
+                        problems=[], revised_image_prompt="")
+    assert reflect.decide(smile)[0] == "pass"  # 表情與看不到的元素不觸發重生
+    assert reflect.attribute_checklist("young girl, curly brown hair, ") == ["young girl", "curly brown hair"]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        llm.CACHE_DIR = Path(tmp) / "llm"
+        imgs = []
+        for i, color in enumerate([(255, 0, 0), (0, 0, 255)]):
+            imgs.append(Path(tmp) / f"img{i}.png")
+            Image.new("RGB", (1024, 1024), color).save(imgs[-1])
+        sent = []
+
+        class Recorder(_FakeClient):
+            def parse(self, **kwargs):
+                sent.append(kwargs["input"][1]["content"])
+                return super().parse(**kwargs)
+
+        good = review()
+        llm._client = Recorder([good, good])
+        for img in imgs + imgs[:1]:  # 第 3 次與第 1 次同圖 → 讀快取
+            llm.structured_call("sys", "user", PanelReview, model="fake", images=[img])
+        assert len(sent) == 2, "不同圖要各呼叫一次，同一張圖要讀快取"
+        part = sent[0][1]
+        assert part["type"] == "input_image" and part["image_url"].startswith("data:image/png;base64,")
+    llm._client = None
+    print("[OK] reflection：動作規則、看圖呼叫附圖、圖的內容納入快取 key")
 
 
 def test_layout():
