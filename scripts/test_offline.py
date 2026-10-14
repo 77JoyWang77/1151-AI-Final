@@ -126,6 +126,29 @@ def test_reflect():
     llm._client = None
     print("[OK] reflection：動作規則、看圖呼叫附圖、圖的內容納入快取 key")
 
+    # reflection_loop：用假的生圖與檢查函式驗證流程
+    job = {"panel_index": 2, "prompt": "orig", "seed": 102}
+    ok = review()
+    missing = review(present=(True, False), revised="mei building a sandcastle")
+    bad_attr = lambda n: review(attrs=("mismatch",) * n + ("match",) * (4 - n))  # noqa: E731
+
+    def run(reviews):
+        calls, seq = [], iter(reviews)
+        out = reflect.reflection_loop(job, SAMPLE, "orig.png",
+                                      generate=lambda j, k: calls.append(j) or f"try{k}.png",
+                                      review=lambda png: next(seq))
+        return out, calls
+
+    out, calls = run([ok])
+    assert out["chosen"] == 0 and not calls  # 原圖通過：不重生
+    out, calls = run([missing, ok])
+    assert out["chosen"] == 1 and calls[0]["seed"] == 102  # 改 prompt：seed 不變
+    assert "sandcastle" in calls[0]["prompt"] and "yellow raincoat" in calls[0]["prompt"]  # 外觀仍由程式組合
+    out, calls = run([bad_attr(3), bad_attr(4), bad_attr(2), bad_attr(3)])
+    assert [c["seed"] for c in calls] == [1102, 2102, 3102]  # 換 seed，最多 3 次
+    assert len(out["attempts"]) == 4 and out["chosen"] == 2  # 都沒通過：挑外觀不符最少的
+    print("[OK] reflection loop：通過不重生、改 prompt 保留 seed、換 seed、最多 3 次並挑最佳")
+
 
 def test_layout():
     """排版：避頭點、對話框尾巴幾何、避開臉部、頁面尺寸一致。"""

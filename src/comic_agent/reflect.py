@@ -105,3 +105,54 @@ def decide(review: PanelReview) -> tuple[str, list[str]]:
     if (visible and len(wrong) / len(visible) > ATTR_MISMATCH_LIMIT) or review.problems:
         return "reseed", reasons
     return "pass", reasons
+
+
+# ==== Reflection loop：依 decide() 的結果重生，每格最多 max_tries 次 ====
+
+MAX_TRIES = 3
+RESEED_STEP = 1000  # 換 seed：seed + 1000 × 嘗試次數，不與分鏡 seed（故事 × 100 + 格數）重疊
+
+
+def review_score(review: PanelReview) -> tuple[int, int, int]:
+    """越小越好：(缺漏元素數, 外觀不符數, 問題數)；用來在多次嘗試中挑最好的一張。"""
+    missing = sum(e.status == "absent" and e.kind != "expression" for e in review.elements)
+    wrong = sum(a.status == "mismatch" for a in review.attributes)
+    return missing, wrong, len(review.problems)
+
+
+def revised_prompt(board: dict, panel_index: int, image_prompt: str) -> str:
+    """把改寫後的 image_prompt 放回分鏡，再用 build_sd_prompt 組合（外觀仍只定義一次）。"""
+    from .schema import Storyboard
+    from .storyboard import build_sd_prompt
+
+    sb = Storyboard.model_validate(board)
+    panel = sb.panels[panel_index - 1].model_copy(update={"image_prompt": image_prompt})
+    return build_sd_prompt(sb, panel)
+
+
+def reflection_loop(job: dict, board: dict, original_png, generate, review, max_tries: int = MAX_TRIES) -> dict:
+    """單格的 reflection loop（不含模型，生圖與檢查由呼叫端傳入，方便離線測試）。
+
+    generate(job, attempt) -> 圖檔路徑；review(png) -> PanelReview（一律對照原本的分鏡檢查）。
+    revise_prompt：用評審改寫的 image_prompt、seed 不變（只改 prompt 一個變因）；
+    reseed：prompt 不變、seed 加 RESEED_STEP × 嘗試次數。
+    回傳 {"attempts": [...], "chosen": 選中的嘗試編號}；第 0 次是原圖。
+    """
+    rv = review(original_png)
+    action, reasons = decide(rv)
+    attempts = [{"attempt": 0, "path": str(original_png), "action": action, "reasons": reasons,
+                 "score": review_score(rv), "prompt": job["prompt"], "seed": job["seed"]}]
+    current = dict(job)
+    while action != "pass" and len(attempts) <= max_tries:
+        k = len(attempts)
+        if action == "revise_prompt":
+            current = {**current, "prompt": revised_prompt(board, job["panel_index"], rv.revised_image_prompt)}
+        else:
+            current = {**current, "seed": job["seed"] + RESEED_STEP * k}
+        png = generate(current, k)
+        rv = review(png)
+        action, reasons = decide(rv)
+        attempts.append({"attempt": k, "path": str(png), "action": action, "reasons": reasons,
+                         "score": review_score(rv), "prompt": current["prompt"], "seed": current["seed"]})
+    chosen = min(attempts, key=lambda a: (a["action"] != "pass", a["score"], a["attempt"]))
+    return {"attempts": attempts, "chosen": chosen["attempt"]}

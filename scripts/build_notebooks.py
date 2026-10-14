@@ -530,6 +530,165 @@ print(f"{scheme}：已完成 {len(secs)} 格，平均每格 {sum(secs) / len(sec
 ''')
 
 
+# ==== 03：Reflection loop 重生 ====
+
+start("03_reflect_regen.ipynb")
+
+md('''
+# 03 Reflection loop：GPT 看圖檢查 → 不合格就重生
+
+對指定方案（`SCHEME`）的每一格：GPT（gpt-4.1）對照分鏡檢查 → 依規則決定 通過／改寫 prompt／換 seed → 重生後再檢查，**每格最多重生 3 次**，保留最好的一張。
+
+- 改寫 prompt：用評審改寫的 image_prompt 重新組合（外觀仍只定義一次），seed 不變
+- 換 seed：seed + 1000 × 嘗試次數
+- 一律對照**原本的分鏡**檢查（改寫的 prompt 只是生圖手段）
+- 結果存成新方案 `<SCHEME>_R`（每格的嘗試紀錄在 json 的 `reflection` 欄位，嘗試的圖在 `<SCHEME>_R/try1..3/`），可與 `<SCHEME>` 比較，即企畫書的 **reflection 消融實驗**
+- 費用：每次檢查約 0.009 美金（30 格初檢約 0.26 美金，加上重生後的複檢）；檢查結果快取在 Drive，斷線重跑不重複付費
+
+**執行前**：T4 GPU；左側「鑰匙」Secrets 新增 `OPENAI_API_KEY`（OpenAI 的 key，`sk-` 開頭），開啟 Notebook access。**不要**把 OpenAI key 填到 `GH_TOKEN`。
+''')
+
+code(settings_code('''
+SCHEME = "B_s0.3"          # 要做 reflection 的方案（需已由 01／02 生成）
+STORIES = [1, 2, 3, 4, 5]
+MAX_TRIES = 3
+'''))
+md(CLONE_MD)
+code(CLONE_CODE)
+code(PIP_CODE.rstrip("\n") + " openai\n")
+
+md('''
+### OpenAI key
+
+從 Colab Secrets 讀取，不會印出內容。GPT 檢查結果快取在 Drive（`cache/llm/`），必須在 import `comic_agent` **之前**設定。
+''')
+
+code('''
+import os
+
+from google.colab import userdata
+
+key = (userdata.get("OPENAI_API_KEY") or "").strip()
+assert key.startswith("sk-"), "請在 Colab Secrets 新增 OPENAI_API_KEY（OpenAI 的 key，以 sk- 開頭），並開啟 Notebook access"
+os.environ["OPENAI_API_KEY"] = key
+os.environ["LLM_CACHE_DIR"] = f"{DRIVE_ROOT}/cache/llm"  # GPT 檢查結果存 Drive：斷線重跑不重複付費
+del key
+print("OpenAI key 已設定")
+''')
+
+code(imports_code('''from comic_agent import llm, reflect
+
+REVIEW_OUT = f"{SCHEME}_R"
+jobs = [j for j in render.iter_jobs(boards, SCHEME) if j["story_no"] in STORIES]
+missing = [j for j in jobs if not render.panel_paths(OUT_ROOT, j)[0].exists()]
+assert not missing, f"{SCHEME} 還有 {len(missing)} 格沒有生成，請先跑 01／02"
+print(f"{SCHEME}：{len(jobs)} 格 → 輸出 {REVIEW_OUT}；評審模型 {reflect.REVIEW_MODEL}；commit {GIT_COMMIT}")
+'''))
+md(LOAD_SDXL_MD)
+code(LOAD_SDXL_CODE)
+code(GENERATE_CODE)
+
+md('''
+### 方案 B：載入 IP-Adapter
+
+scale 由方案名稱讀出（`B_s0.3` → 0.3），參考圖由該方案第 1 格的紀錄讀出，與原本生成時完全相同。方案 A 會略過這一格。
+''')
+
+code('''
+IP_WEIGHT = "ip-adapter-plus_sdxl_vit-h.safetensors"
+
+
+def pipe_kwargs_for(job):
+    return {}
+
+
+def record_for(job):
+    return {}
+
+
+if SCHEME.startswith("B_s"):
+    IP_SCALE = float(SCHEME.split("_s")[1])
+    refs = {}
+    for s in STORIES:
+        rec_path = render.panel_paths(OUT_ROOT, {"scheme": SCHEME, "story_no": s, "panel_index": 1})[1]
+        refs[s] = json.loads(rec_path.read_text(encoding="utf-8"))["ref_image"]
+    pipe.load_ip_adapter("h94/IP-Adapter", subfolder="sdxl_models", weight_name=IP_WEIGHT,
+                         image_encoder_folder="models/image_encoder")
+    pipe.set_ip_adapter_scale(IP_SCALE)
+
+    def pipe_kwargs_for(job):
+        return {"ip_adapter_image": Image.open(Path(OUT_ROOT) / refs[job["story_no"]]).convert("RGB")}
+
+    def record_for(job):
+        return {"ip_adapter": IP_WEIGHT, "ip_scale": IP_SCALE, "ref_image": refs[job["story_no"]]}
+
+    print(f"IP-Adapter scale {IP_SCALE}，參考圖：{refs}")
+''')
+
+md('''
+### 逐格 reflection loop
+
+已完成的格（`<SCHEME>_R` 有紀錄）會略過，可斷線續跑。
+''')
+
+code('''
+import shutil
+
+results = []
+for job in jobs:
+    board = boards[job["story_no"]]
+    panel = board["panels"][job["panel_index"] - 1]
+    final_png, final_js = render.panel_paths(OUT_ROOT, {**job, "scheme": REVIEW_OUT})
+    if final_js.exists():
+        results.append(json.loads(final_js.read_text(encoding="utf-8"))["reflection"])
+        continue
+
+    def gen(j, k):
+        png, _ = generate({**j, "scheme": f"{REVIEW_OUT}/try{k}"},
+                          pipe_kwargs=pipe_kwargs_for(j), record=record_for(j))
+        return png
+
+    out = reflect.reflection_loop(job, board, render.panel_paths(OUT_ROOT, job)[0], gen,
+                                  review=lambda png: reflect.review_panel(png, panel, board),
+                                  max_tries=MAX_TRIES)
+    chosen = out["attempts"][out["chosen"]]
+    final_png.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(chosen["path"], final_png)
+    render.write_record(final_js, {**job, "scheme": REVIEW_OUT, "prompt": chosen["prompt"], "seed": chosen["seed"]},
+                        CONFIG, git_commit=GIT_COMMIT, reflection=out, **record_for(job))
+    results.append(out)
+    trail = " → ".join(a["action"] for a in out["attempts"])
+    print(f"story {job['story_no']} panel {job['panel_index']}：{trail}（選第 {out['chosen']} 次）")
+''')
+
+md('''
+### 統計與比較
+
+- 初檢通過率 vs 最終通過率：reflection 救回了多少格
+- 重生次數與 API 費用：值不值得（企畫書的消融實驗）
+- 並排圖：每篇上排是原方案、下排是 reflection 後
+''')
+
+code('''
+first_pass = sum(r["attempts"][0]["action"] == "pass" for r in results)
+final_pass = sum(r["attempts"][r["chosen"]]["action"] == "pass" for r in results)
+regens = sum(len(r["attempts"]) - 1 for r in results)
+u = llm.USAGE
+cost = u["input_tokens"] / 1e6 * 2.0 + u["output_tokens"] / 1e6 * 8.0  # gpt-4.1 單價（估算）
+print(f"初檢通過 {first_pass}/{len(results)} → 最終通過 {final_pass}/{len(results)}，共重生 {regens} 次")
+print(f"本次 API：{u['calls']} 次（快取命中不算），估計 {cost:.3f} 美金")
+
+for story_no in STORIES:
+    n = len(boards[story_no]["panels"])
+    pngs = [render.panel_paths(OUT_ROOT, {"scheme": s, "story_no": story_no, "panel_index": i})[0]
+            for s in (SCHEME, REVIEW_OUT) for i in range(1, n + 1)]
+    sheet = contact_sheet(pngs, cols=n, thumb=256, labels=[SCHEME, REVIEW_OUT])
+    sheet.save(Path(OUT_ROOT) / f"reflect_story_{story_no}.png")
+    print(f"story {story_no}《{boards[story_no]['title']}》")
+    display(sheet)
+''')
+
+
 # ==== 寫檔 ====
 
 for name, nb_cells in notebooks.items():
